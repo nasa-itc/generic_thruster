@@ -21,7 +21,7 @@ GENERIC_THRUSTER_AppData_t GENERIC_THRUSTER_AppData;
 /*
 ** Application entry point and main process loop
 */
-void GENERIC_THRUSTER_AppMain(void)
+void GENERIC_THR_AppMain(void)
 {
     int32 status = OS_SUCCESS;
 
@@ -116,7 +116,7 @@ int32 GENERIC_THRUSTER_AppInit(void)
     /*
     ** Create the Software Bus command pipe 
     */
-    status = CFE_SB_CreatePipe(&GENERIC_THRUSTER_AppData.CmdPipe, GENERIC_THRUSTER_PIPE_DEPTH, "GENERIC_THRUSTER_CMD_PIPE");
+    status = CFE_SB_CreatePipe(&GENERIC_THRUSTER_AppData.CmdPipe, GENERIC_THRUSTER_PIPE_DEPTH, "GEN_THR");
     if (status != CFE_SUCCESS)
     {
         CFE_EVS_SendEvent(GENERIC_THRUSTER_PIPE_ERR_EID, CFE_EVS_EventType_ERROR,

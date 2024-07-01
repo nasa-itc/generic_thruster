@@ -82,10 +82,10 @@ extern GENERIC_THRUSTER_AppData_t GENERIC_THRUSTER_AppData; /* GENERIC_THRUSTER 
 **
 ** Local function prototypes.
 **
-** Note: Except for the entry point (GENERIC_THRUSTER_AppMain), these
+** Note: Except for the entry point (GENERIC_THR_AppMain), these
 **       functions are not called from any other source module.
 */
-void  GENERIC_THRUSTER_AppMain(void);
+void  GENERIC_THR_AppMain(void);
 int32 GENERIC_THRUSTER_AppInit(void);
 void  GENERIC_THRUSTER_ProcessCommandPacket(void);
 void  GENERIC_THRUSTER_ProcessGroundCommand(void);
