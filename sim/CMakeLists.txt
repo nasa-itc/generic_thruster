@@ -11,7 +11,6 @@ include_directories(inc
 set(generic_thruster_sim_src
     src/generic_thruster_hardware_model.cpp
     src/generic_thruster_42_data_provider.cpp
-    src/generic_thruster_data_provider.cpp
     src/generic_thruster_data_point.cpp
 )
 

@@ -1,38 +1,13 @@
-# Generic_thruster - NOS3 Component
-This repository contains the NOS3 Generic_thruster Component.
+# Generic Thruster - NOS3 Component
+This repository contains the NOS3 Generic Thruster Component.
 This includes flight software (FSW), ground software (GSW), simulation, and support directories.
 
-## Component Template
-This component template utilizes canned files from the existing [generic_thruster component](https://github.com/nasa-itc/generic_thruster) to generate a new component to do development in.
-
-Expected utilization:  
-* Determine the desired component name
-* Create a new submodule for the component via GitHub
-* Add the submodule to this project
-  * `git submodule init`
-  * `git submodule add -f -b main <New_Submodule_Link> ./components/<New_Component_Name>`
-* Generate the new files
-  * `./generate_template.sh <New_Component_Name>`
-    * Note that <New_Component_Name> must be <= 10 characters by default or you'll need to shorten the software bus pipe name after the fact
-* The new files should be placed in the submodule
-  * `../<New_Component_Name>/`
-* Commit the new files to the submodule
-  * `git add * && git add .gitignore`
-  * `git commit -m "Initial component template based on version 0.0.0"`
-* Add new component to flight software (fsw) in the following files:
-  * `./fsw/nos3_defs/cpu1_cfe_es_startup.scr`
-  * `./fsw/nos3_defs/targets.cmake`
-  * `./fsw/nos3_defs/tables/*`
-* Add new component to ground software (gsw) in the following files:
-  * `./gsw/cosmos/config/system/nos3_system.txt`
-  * `./gsw/cosmos/config/tools/cmd_tlm_server/nos3_cmd_tlm_server.txt`
-  * `./gsw/scripts/launch.sh`
-
 ## Overview
-In addition to being used by the template generator, the generic_thruster component provides an executable example for the user.  This generic_thruster component is a UART device that accepts multiple commands, including requests for telemetry and data.
-The available FSW is for use in the core Flight System (cFS) while the GSW supports COSMOS.
-A NOS3 simulation is available which includes both generic_thruster and 42 data providers.
+The generic thruster is a UART device that can be used to command the thrusters on and off.  The available flight software is for use in the core Flight System (cFS) while the ground software supports COSMOS.  A NOS3 simulation is available which uses a 42 data provider.
 
+## Mechanical
+### Reference System
+The +x axis is in the direction of the thrust.  The +y and +z axes are perpendicular to the thruster, and together with the +z axis make an orthogonal, right-handed coordinate system.
 
 # Device Communications
 The protocol, commands, and responses of the component are captured below.
@@ -44,30 +19,17 @@ All communications with the device require / contain a header of 0xDEAD and a tr
 
 ## Commands
 All commands received by the device are echoed back to the sender to confirm receipt.
-Should commmands involve a reply, the device immediately sends the reply after the command echo.
 Device commands are all formatted in the same manner and are fixed in size:
 * uint16, 0xDEAD
-* uint8, command identifier
-  - (0) Get Housekeeping
-  - (1) Get Generic_thruster
-  - (2) Set Configuration
-* uint32, command payload
-  - Unused for all but set configuration command
+* uint8, thruster number
+* uint8, command
+  - (0) Thruster off
+  - (1) Thruster on
 * uint16, 0xBEEF
 
 ## Response
 Response formats are as follows:
-* Housekeeping
-  - uint16, 0xDEAD
-  - uint32, Command Counter
-    * Increments for each command received
-  - uint32, Configuration
-    * Internal configuration number in use by the device
-  - uint32, Status
-    * Self reported status of the component where zero is completely healthy and each bit represents different errors
-    * No means to clear / set status except for a power cycle to the device
-  - uint16, 0xBEEF
-* Generic_thruster
+* Generic Thruster
   - uint16, 0xDEAD
   - uint32, Command Counter
     * Increments for each command received
@@ -88,42 +50,16 @@ Refer to the file [fsw/platform_inc/generic_thruster_platform_cfg.h](fsw/platfor
 configuration settings, as well as a summary on overriding parameters in mission-specific repositories.
 
 ## Simulation
-The default configuration returns data that is X * 0.001, Y * 0.002, and Z * 0.003 the request count after conversions:
-```
-<simulator>
-    <name>generic_thruster_sim</name>
-    <active>true</active>
-    <library>libgeneric_thruster_sim.so</library>
-    <hardware-model>
-        <type>GENERIC_THRUSTER</type>
-        <connections>
-            <connection><type>command</type>
-                <bus-name>command</bus-name>
-                <node-name>generic_thruster-sim-command-node</node-name>
-            </connection>
-            <connection><type>usart</type>
-                <bus-name>usart_29</bus-name>
-                <node-port>29</node-port>
-            </connection>
-        </connections>
-        <data-provider>
-            <type>GENERIC_THRUSTER_PROVIDER</type>
-        </data-provider>
-    </hardware-model>
-</simulator>
-```
-
 ## 42
-Optionally the 42 data provider can be configured in the `nos3-simulator.xml`:
+The 42 data provider can be configured in the `nos3-simulator.xml`:
 ```
-        <data-provider>
-            <type>GENERIC_THRUSTER_42_PROVIDER</type>
-            <hostname>localhost</hostname>
-            <port>4242</port>
-            <max-connection-attempts>5</max-connection-attempts>
-            <retry-wait-seconds>5</retry-wait-seconds>
-            <spacecraft>0</spacecraft>
-        </data-provider>
+            <data-provider>
+                <type>GENERIC_THRUSTER_42_PROVIDER</type>
+                <hostname>fortytwo</hostname>
+                <command-port>4280</command-port>
+                <max-connection-attempts>0</max-connection-attempts>
+                <retry-wait-seconds>1</retry-wait-seconds>
+            </data-provider>
 ```
 
 
@@ -137,19 +73,20 @@ To build the standalone version, assuming starting from top level NOS3 repositor
   * Can override target selection by adding `-DTGTNAME=cpu1`
 * make
 
-To run the standalone version, assuming starting rom the top level NOS3 repository:
+To run the standalone version, assuming starting from the top level NOS3 repository:
 * Follow the build steps above
-* make
-* make checkout
-  * Launches NOS Engine, NOS Time Driver, NOS Terminal, Generic_thruster Sim, and Generic_thruster Checkout
+* cd ../../../..
+* exit
+* Add generic_thruster_sim to docker_launch.sh
+* make launch
+  * Launches NOS Engine, NOS Time Driver, NOS Terminal, Generic_thruster Sim, and many other sims
+* make debug
+* cd components/generic_thruster/support/build
+* ./generic_thruster_checkout
+* exit
 * make stop
-
-# Documentation
-If this generic_thruster application had an ICD and/or test procedure, they would be linked here.
 
 ## Releases
 We use [SemVer](http://semver.org/) for versioning. For the versions available, see the tags on this repository.
-* v1.0.0 - X/Y/Z 
-  - Updated to be a component repository including FSW, GSW, Sim, and Standalone checkout
-* v0.1.0 - 10/9/2021 
+* v1.0.0 
   - Initial release with version tagging
