@@ -467,7 +467,34 @@ void GENERIC_THRUSTER_Toggle(GENERIC_THRUSTER_Toggle_cmd_t *Msg)
 {
     if (GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceEnabled == GENERIC_THRUSTER_DEVICE_ENABLED)
     {
+        int32_t status;
+        uint8_t request[6];
         CFE_EVS_SendEvent(GENERIC_THRUSTER_TOGGLE_INF_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_THRUSTER: Toggle thruster %d to %s", Msg->ThrusterNumber, Msg->State ? "On " : "Off");
+//        sprintf(request, "DEAD%1.1d%1.1dBEEF", Msg->ThrusterNumber, Msg->State);
+        request[0] = 0xDE;
+        request[1] = 0xAD;
+        request[2] = Msg->ThrusterNumber;
+        request[3] = Msg->State;
+        request[4] = 0xBE;
+        request[5] = 0xEF;
+        status = uart_write_port(&GENERIC_THRUSTER_AppData.Generic_thrusterUart, (uint8_t*)request, 6);
+        if (status < 0) {
+            GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceErrorCount++;
+            CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_TOGGLE_EID, CFE_EVS_EventType_ERROR, "GENERIC_THRUSTER: Error writing to UART=%d\n", status);
+        } else {
+            GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceCount++;
+            /* Read the reply */
+            /*uint8_t DataBuffer[1024];
+            int32 DataLen;
+            DataLen = uart_bytes_available(&GENERIC_THRUSTER_AppData.Generic_thrusterUart); // check how many bytes are waiting on the uart
+            if (DataLen > 0)
+            {
+                uart_read_port(&GENERIC_THRUSTER_AppData.Generic_thrusterUart, DataBuffer, DataLen);
+                OS_printf("GENERIC_THRUSTER: Response on UART=");
+                for (int i = 0; i < DataLen; i++) OS_printf("0x%2.2x ", DataBuffer[i]);
+                OS_printf("\n");
+            }*/
+        }
     } 
     else 
     {

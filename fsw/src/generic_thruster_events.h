@@ -35,6 +35,7 @@
 #define GENERIC_THRUSTER_CMD_CONFIG_INF_EID        20
 #define GENERIC_THRUSTER_TOGGLE_INF_EID            21
 #define GENERIC_THRUSTER_TOGGLE_ERR_EID            22
+#define GENERIC_THRUSTER_CMD_TOGGLE_EID            23
 
 /* Standard telemetry event IDs */
 #define GENERIC_THRUSTER_DEVICE_TLM_ERR_EID        30

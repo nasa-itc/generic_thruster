@@ -135,90 +135,6 @@ namespace Nos3
     }
 
 
-    /* Custom function to prepare the Generic_thruster HK telemetry */
-    void Generic_thrusterHardwareModel::create_generic_thruster_hk(std::vector<uint8_t>& out_data)
-    {
-        /* Prepare data size */
-        out_data.resize(16, 0x00);
-
-        /* Streaming data header - 0xDEAD */
-        out_data[0] = 0xDE;
-        out_data[1] = 0xAD;
-        
-        /* Sequence count */
-        out_data[2] = (_count >> 24) & 0x000000FF; 
-        out_data[3] = (_count >> 16) & 0x000000FF; 
-        out_data[4] = (_count >>  8) & 0x000000FF; 
-        out_data[5] =  _count & 0x000000FF;
-        
-        /* Configuration */
-        out_data[6] = (_config >> 24) & 0x000000FF; 
-        out_data[7] = (_config >> 16) & 0x000000FF; 
-        out_data[8] = (_config >>  8) & 0x000000FF; 
-        out_data[9] =  _config & 0x000000FF;
-
-        /* Device Status */
-        out_data[10] = (_status >> 24) & 0x000000FF; 
-        out_data[11] = (_status >> 16) & 0x000000FF; 
-        out_data[12] = (_status >>  8) & 0x000000FF; 
-        out_data[13] =  _status & 0x000000FF;
-
-        /* Streaming data trailer - 0xBEEF */
-        out_data[14] = 0xBE;
-        out_data[15] = 0xEF;
-    }
-
-
-    /* Custom function to prepare the Generic_thruster Data */
-    void Generic_thrusterHardwareModel::create_generic_thruster_data(std::vector<uint8_t>& out_data)
-    {
-        boost::shared_ptr<Generic_thrusterDataPoint> data_point = boost::dynamic_pointer_cast<Generic_thrusterDataPoint>(_generic_thruster_dp->get_data_point());
-
-        /* Prepare data size */
-        out_data.resize(14, 0x00);
-
-        /* Streaming data header - 0xDEAD */
-        out_data[0] = 0xDE;
-        out_data[1] = 0xAD;
-        
-        /* Sequence count */
-        out_data[2] = (_count >> 24) & 0x000000FF; 
-        out_data[3] = (_count >> 16) & 0x000000FF; 
-        out_data[4] = (_count >>  8) & 0x000000FF; 
-        out_data[5] =  _count & 0x000000FF;
-        
-        /* 
-        ** Payload 
-        ** 
-        ** Device is big engian (most significant byte first)
-        ** Assuming data is valid regardless of dynamic / environmental data
-        ** Floating poing numbers are extremely problematic 
-        **   (https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html)
-        ** Most hardware transmits some type of unsigned integer (e.g. from an ADC), so that's what we've done
-        ** Scale each of the x, y, z (which are in the range [-1.0, 1.0]) by 32767, 
-        **   and add 32768 so that the result fits in a uint16
-        */
-        double dx = data_point->get_generic_thruster_data_x();
-        double dy = data_point->get_generic_thruster_data_y();
-        double dz = data_point->get_generic_thruster_data_z();
-        uint16_t x   = (uint16_t)(dx*32767.0 + 32768.0);
-        out_data[6]  = (x >> 8) & 0x00FF;
-        out_data[7]  =  x       & 0x00FF;
-        uint16_t y   = (uint16_t)(dy*32767.0 + 32768.0);
-        out_data[8]  = (y >> 8) & 0x00FF;
-        out_data[9]  =  y       & 0x00FF;
-        uint16_t z   = (uint16_t)(dz*32767.0 + 32768.0);
-        out_data[10] = (z >> 8) & 0x00FF;
-        out_data[11] =  z       & 0x00FF;
-
-        sim_logger->debug("Generic_thrusterHardwareModel::create_generic_thruster_data: data_point=%f, %f, %f, converted values=%u, %u, %u.", dx, dy, dz, x, y, z);
-
-        /* Streaming data trailer - 0xBEEF */
-        out_data[12] = 0xBE;
-        out_data[13] = 0xEF;
-    }
-
-
     /* Protocol callback */
     void Generic_thrusterHardwareModel::uart_read_callback(const uint8_t *buf, size_t len)
     {
@@ -239,7 +155,7 @@ namespace Nos3
         else
         {
             /* Check if message is incorrect size */
-            if (in_data.size() != 9)
+            if (in_data.size() != 6)
             {
                 sim_logger->debug("Generic_thrusterHardwareModel::uart_read_callback:  Invalid command size of %ld received!", in_data.size());
                 valid = GENERIC_THRUSTER_SIM_ERROR;
@@ -255,7 +171,7 @@ namespace Nos3
                 else
                 {
                     /* Check trailer - 0xBEEF */
-                    if ((in_data[7] != 0xBE) || (in_data[8] !=0xEF))
+                    if ((in_data[4] != 0xBE) || (in_data[5] !=0xEF))
                     {
                         sim_logger->debug("Generic_thrusterHardwareModel::uart_read_callback:  Trailer incorrect!");
                         valid = GENERIC_THRUSTER_SIM_ERROR;
@@ -270,56 +186,16 @@ namespace Nos3
 
             if (valid == GENERIC_THRUSTER_SIM_SUCCESS)
             {   
-                /* Process command */
-                switch (in_data[2])
-                {
-                    case 0:
-                        /* NOOP */
-                        sim_logger->debug("Generic_thrusterHardwareModel::uart_read_callback:  NOOP command received!");
-                        break;
-
-                case 1:
-                        /* Request HK */
-                        sim_logger->debug("Generic_thrusterHardwareModel::uart_read_callback:  Send HK command received!");
-                        create_generic_thruster_hk(out_data);
-                        break;
-
-                    case 2:
-                        /* Request data */
-                        sim_logger->debug("Generic_thrusterHardwareModel::uart_read_callback:  Send data command received!");
-                        create_generic_thruster_data(out_data);
-                        break;
-
-                    case 3:
-                        /* Configuration */
-                        sim_logger->debug("Generic_thrusterHardwareModel::uart_read_callback:  Configuration command received!");
-                        _config  = in_data[3] << 24;
-                        _config |= in_data[4] << 16;
-                        _config |= in_data[5] << 8;
-                        _config |= in_data[6];
-                        break;
-                    
-                    default:
-                        /* Unused command code */
-                        valid = GENERIC_THRUSTER_SIM_ERROR;
-                        sim_logger->debug("Generic_thrusterHardwareModel::uart_read_callback:  Unused command %d received!", in_data[2]);
-                        break;
-                }
+                out_data = in_data;
             }
         }
 
         /* Echo command since format valid */
         if (valid == GENERIC_THRUSTER_SIM_SUCCESS)
         {
-            _uart_connection->write(&in_data[0], in_data.size());
-
-            /* Send response if existing */
-            if (out_data.size() > 0)
-            {
-                sim_logger->debug("Generic_thrusterHardwareModel::uart_read_callback:  REPLY %s",
-                    SimIHardwareModel::uint8_vector_to_hex_string(out_data).c_str());
-                _uart_connection->write(&out_data[0], out_data.size());
-            }
+            sim_logger->debug("Generic_thrusterHardwareModel::uart_read_callback:  REPLY %s",
+                SimIHardwareModel::uint8_vector_to_hex_string(out_data).c_str());
+            _uart_connection->write(&out_data[0], out_data.size());
         }
     }
 }

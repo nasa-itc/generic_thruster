@@ -27,21 +27,6 @@ Device commands are all formatted in the same manner and are fixed in size:
   - (1) Thruster on
 * uint16, 0xBEEF
 
-## Response
-Response formats are as follows:
-* Generic Thruster
-  - uint16, 0xDEAD
-  - uint32, Command Counter
-    * Increments for each command received
-  - uint16, Data X
-    * X component of generic_thruster data
-  - uint16, Data Y
-    * X component of generic_thruster data
-  - uint16, Data Z
-    * X component of generic_thruster data
-  - uint16, 0xBEEF
-
-
 # Configuration
 The various configuration parameters available for each portion of the component are captured below.
 
