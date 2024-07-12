@@ -12,7 +12,6 @@
 ** Include Files
 */
 #include "cfe.h"
-#include "generic_thruster_device.h"
 #include "generic_thruster_events.h"
 #include "generic_thruster_platform_cfg.h"
 #include "generic_thruster_perfids.h"
@@ -55,12 +54,6 @@ typedef struct
     CFE_MSG_Message_t * MsgPtr;             /* Pointer to msg received on software bus */
     CFE_SB_PipeId_t CmdPipe;            /* Pipe Id for HK command pipe */
     uint32 RunStatus;                   /* App run status for controlling the application state */
-
-    /*
-	** Device data 
-    ** TODO: Make specific to your application
-	*/
-    GENERIC_THRUSTER_Device_tlm_t DevicePkt;      /* Device specific data packet */
 
     /* 
     ** Device protocol

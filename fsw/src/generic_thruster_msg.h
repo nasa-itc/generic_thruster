@@ -10,7 +10,6 @@
 #define _GENERIC_THRUSTER_MSG_H_
 
 #include "cfe.h"
-#include "generic_thruster_device.h"
 
 
 /*
@@ -53,19 +52,6 @@ typedef struct
 
 } GENERIC_THRUSTER_Config_cmd_t;
 
-
-/*
-** GENERIC_THRUSTER device telemetry definition
-*/
-typedef struct 
-{
-    CFE_MSG_TelemetryHeader_t TlmHeader;
-    GENERIC_THRUSTER_Device_Data_tlm_t Generic_thruster;
-
-} __attribute__((packed)) GENERIC_THRUSTER_Device_tlm_t;
-#define GENERIC_THRUSTER_DEVICE_TLM_LNGTH sizeof ( GENERIC_THRUSTER_Device_tlm_t )
-
-
 /*
 ** GENERIC_THRUSTER housekeeping type definition
 */
@@ -81,7 +67,6 @@ typedef struct
     ** TODO: Edit and add specific telemetry values to this struct
     */
     uint8   DeviceEnabled;
-    GENERIC_THRUSTER_Device_HK_tlm_t DeviceHK;
 
 } __attribute__((packed)) GENERIC_THRUSTER_Hk_tlm_t;
 #define GENERIC_THRUSTER_HK_TLM_LNGTH sizeof ( GENERIC_THRUSTER_Hk_tlm_t )

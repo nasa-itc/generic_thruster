@@ -16,6 +16,6 @@
 ** id conflict with other apps.  Performance IDs are used for cFE performance
 ** metrics.
 */
-#define GENERIC_THRUSTER_PERF_ID          500
+#define GENERIC_THRUSTER_PERF_ID          508
 
 #endif /* _GENERIC_THRUSTER_PERFIDS_H_ */
