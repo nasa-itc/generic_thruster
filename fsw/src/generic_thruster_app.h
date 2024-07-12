@@ -81,13 +81,14 @@ extern GENERIC_THRUSTER_AppData_t GENERIC_THRUSTER_AppData; /* GENERIC_THRUSTER 
 void  GENERIC_THR_AppMain(void);
 int32 GENERIC_THRUSTER_AppInit(void);
 void  GENERIC_THRUSTER_ProcessCommandPacket(void);
-void  GENERIC_THRUSTER_ProcessGroundCommand(void);
+void  GENERIC_THRUSTER_ProcessGroundCommand(CFE_MSG_Message_t * Msg);
 void  GENERIC_THRUSTER_ProcessTelemetryRequest(void);
 void  GENERIC_THRUSTER_ReportHousekeeping(void);
 void  GENERIC_THRUSTER_ReportDeviceTelemetry(void);
 void  GENERIC_THRUSTER_ResetCounters(void);
 void  GENERIC_THRUSTER_Enable(void);
 void  GENERIC_THRUSTER_Disable(void);
+void GENERIC_THRUSTER_Toggle(GENERIC_THRUSTER_Toggle_cmd_t *Msg);
 int32 GENERIC_THRUSTER_VerifyCmdLength(CFE_MSG_Message_t * msg, uint16 expected_length);
 
 #endif /* _GENERIC_THRUSTER_APP_H_ */

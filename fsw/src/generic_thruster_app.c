@@ -208,7 +208,7 @@ void GENERIC_THRUSTER_ProcessCommandPacket(void)
         ** Ground Commands with command codes fall under the GENERIC_THRUSTER_CMD_MID (Message ID)
         */
         case GENERIC_THRUSTER_CMD_MID:
-            GENERIC_THRUSTER_ProcessGroundCommand();
+            GENERIC_THRUSTER_ProcessGroundCommand(GENERIC_THRUSTER_AppData.MsgPtr);
             break;
 
         /*
@@ -235,7 +235,7 @@ void GENERIC_THRUSTER_ProcessCommandPacket(void)
 ** Process ground commands
 ** TODO: Add additional commands required by the specific component
 */
-void GENERIC_THRUSTER_ProcessGroundCommand(void)
+void GENERIC_THRUSTER_ProcessGroundCommand(CFE_MSG_Message_t * Msg)
 {
     CFE_SB_MsgId_t MsgId = CFE_SB_INVALID_MSG_ID;
     CFE_MSG_FcnCode_t CommandCode = 0;
@@ -298,6 +298,14 @@ void GENERIC_THRUSTER_ProcessGroundCommand(void)
             {
                 CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_DISABLE_INF_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_THRUSTER: Disable command received");
                 GENERIC_THRUSTER_Disable();
+            }
+            break;
+
+        case GENERIC_THRUSTER_TOGGLE_CC:
+            if (GENERIC_THRUSTER_VerifyCmdLength(GENERIC_THRUSTER_AppData.MsgPtr, sizeof(GENERIC_THRUSTER_Toggle_cmd_t)) == OS_SUCCESS)
+            {
+                CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_TOGGLE_INF_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_THRUSTER: Toggle Thruster command received");
+                GENERIC_THRUSTER_Toggle((GENERIC_THRUSTER_Toggle_cmd_t *)Msg);
             }
             break;
 
@@ -455,6 +463,17 @@ void GENERIC_THRUSTER_Disable(void)
     return;
 }
 
+void GENERIC_THRUSTER_Toggle(GENERIC_THRUSTER_Toggle_cmd_t *Msg)
+{
+    if (GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceEnabled == GENERIC_THRUSTER_DEVICE_ENABLED)
+    {
+        CFE_EVS_SendEvent(GENERIC_THRUSTER_TOGGLE_INF_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_THRUSTER: Toggle thruster %d to %s", Msg->ThrusterNumber, Msg->State ? "On " : "Off");
+    } 
+    else 
+    {
+        CFE_EVS_SendEvent(GENERIC_THRUSTER_TOGGLE_ERR_EID, CFE_EVS_EventType_ERROR, "GENERIC_THRUSTER: Cannot toggle thruster, they are disabled");
+    }
+}
 
 /*
 ** Verify command packet length matches expected

@@ -20,8 +20,7 @@
 #define GENERIC_THRUSTER_RESET_COUNTERS_CC       1
 #define GENERIC_THRUSTER_ENABLE_CC               2
 #define GENERIC_THRUSTER_DISABLE_CC              3
-#define GENERIC_THRUSTER_CONFIG_CC               4
-
+#define GENERIC_THRUSTER_TOGGLE_CC               4
 
 /* 
 ** Telemetry Request Command Codes
@@ -41,7 +40,6 @@ typedef struct
 
 } GENERIC_THRUSTER_NoArgs_cmd_t;
 
-
 /*
 ** GENERIC_THRUSTER write configuration command
 */
@@ -51,6 +49,14 @@ typedef struct
     uint32   DeviceCfg;
 
 } GENERIC_THRUSTER_Config_cmd_t;
+
+typedef struct
+{
+    CFE_MSG_CommandHeader_t CmdHeader;
+    uint8                   ThrusterNumber;
+    uint8                   State; // 0 = off, 1 = on
+    
+} GENERIC_THRUSTER_Toggle_cmd_t;
 
 /*
 ** GENERIC_THRUSTER housekeeping type definition
