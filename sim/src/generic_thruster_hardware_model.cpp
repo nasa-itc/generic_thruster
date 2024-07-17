@@ -1,3 +1,4 @@
+#include <generic_thruster_42_data_provider.hpp>
 #include <generic_thruster_hardware_model.hpp>
 
 namespace Nos3
@@ -187,6 +188,10 @@ namespace Nos3
             if (valid == GENERIC_THRUSTER_SIM_SUCCESS)
             {   
                 out_data = in_data;
+
+                std::stringstream ss;
+                ss << "SC[0].AC.Thr[" << static_cast<unsigned>(in_data[2]) << "].ThrustLevelCmd = " << static_cast<unsigned>(in_data[3]);
+                dynamic_cast<Generic_thruster42DataProvider*>(_generic_thruster_dp)->send_command_to_socket(ss.str());
             }
         }
 
