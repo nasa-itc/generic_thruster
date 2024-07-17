@@ -88,7 +88,7 @@ void  GENERIC_THRUSTER_ReportDeviceTelemetry(void);
 void  GENERIC_THRUSTER_ResetCounters(void);
 void  GENERIC_THRUSTER_Enable(void);
 void  GENERIC_THRUSTER_Disable(void);
-void GENERIC_THRUSTER_Toggle(GENERIC_THRUSTER_Toggle_cmd_t *Msg);
+void  GENERIC_THRUSTER_Percentage(GENERIC_THRUSTER_Percentage_cmd_t *Msg);
 int32 GENERIC_THRUSTER_VerifyCmdLength(CFE_MSG_Message_t * msg, uint16 expected_length);
 
 #endif /* _GENERIC_THRUSTER_APP_H_ */

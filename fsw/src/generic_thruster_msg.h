@@ -20,7 +20,7 @@
 #define GENERIC_THRUSTER_RESET_COUNTERS_CC       1
 #define GENERIC_THRUSTER_ENABLE_CC               2
 #define GENERIC_THRUSTER_DISABLE_CC              3
-#define GENERIC_THRUSTER_TOGGLE_CC               4
+#define GENERIC_THRUSTER_PERCENTAGE_CC           4
 
 /* 
 ** Telemetry Request Command Codes
@@ -54,9 +54,9 @@ typedef struct
 {
     CFE_MSG_CommandHeader_t CmdHeader;
     uint8                   ThrusterNumber;
-    uint8                   State; // 0 = off, 1 = on
+    uint8                   Percentage;
     
-} GENERIC_THRUSTER_Toggle_cmd_t;
+} GENERIC_THRUSTER_Percentage_cmd_t;
 
 /*
 ** GENERIC_THRUSTER housekeeping type definition

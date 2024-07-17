@@ -301,11 +301,11 @@ void GENERIC_THRUSTER_ProcessGroundCommand(CFE_MSG_Message_t * Msg)
             }
             break;
 
-        case GENERIC_THRUSTER_TOGGLE_CC:
-            if (GENERIC_THRUSTER_VerifyCmdLength(GENERIC_THRUSTER_AppData.MsgPtr, sizeof(GENERIC_THRUSTER_Toggle_cmd_t)) == OS_SUCCESS)
+        case GENERIC_THRUSTER_PERCENTAGE_CC:
+            if (GENERIC_THRUSTER_VerifyCmdLength(GENERIC_THRUSTER_AppData.MsgPtr, sizeof(GENERIC_THRUSTER_Percentage_cmd_t)) == OS_SUCCESS)
             {
-                CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_TOGGLE_INF_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_THRUSTER: Toggle Thruster command received");
-                GENERIC_THRUSTER_Toggle((GENERIC_THRUSTER_Toggle_cmd_t *)Msg);
+                CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_PERCENTAGE_INF_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_THRUSTER: Percentage command received");
+                GENERIC_THRUSTER_Percentage((GENERIC_THRUSTER_Percentage_cmd_t *)Msg);
             }
             break;
 
@@ -463,24 +463,24 @@ void GENERIC_THRUSTER_Disable(void)
     return;
 }
 
-void GENERIC_THRUSTER_Toggle(GENERIC_THRUSTER_Toggle_cmd_t *Msg)
+void GENERIC_THRUSTER_Percentage(GENERIC_THRUSTER_Percentage_cmd_t *Msg)
 {
     if (GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceEnabled == GENERIC_THRUSTER_DEVICE_ENABLED)
     {
         int32_t status;
         uint8_t request[6];
-        CFE_EVS_SendEvent(GENERIC_THRUSTER_TOGGLE_INF_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_THRUSTER: Toggle thruster %d to %s", Msg->ThrusterNumber, Msg->State ? "On " : "Off");
-//        sprintf(request, "DEAD%1.1d%1.1dBEEF", Msg->ThrusterNumber, Msg->State);
+        CFE_EVS_SendEvent(GENERIC_THRUSTER_PERCENTAGE_INF_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_THRUSTER: Thruster %d, percentage on %d", Msg->ThrusterNumber, Msg->Percentage);
+//        sprintf(request, "DEAD%1.1d%1.1dBEEF", Msg->ThrusterNumber, Msg->Percentage);
         request[0] = 0xDE;
         request[1] = 0xAD;
         request[2] = Msg->ThrusterNumber;
-        request[3] = Msg->State;
+        request[3] = Msg->Percentage;
         request[4] = 0xBE;
         request[5] = 0xEF;
         status = uart_write_port(&GENERIC_THRUSTER_AppData.Generic_thrusterUart, (uint8_t*)request, 6);
         if (status < 0) {
             GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceErrorCount++;
-            CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_TOGGLE_EID, CFE_EVS_EventType_ERROR, "GENERIC_THRUSTER: Error writing to UART=%d\n", status);
+            CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_PERCENTAGE_EID, CFE_EVS_EventType_ERROR, "GENERIC_THRUSTER: Error writing to UART=%d\n", status);
         } else {
             GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceCount++;
             /* Read the reply */
@@ -498,7 +498,7 @@ void GENERIC_THRUSTER_Toggle(GENERIC_THRUSTER_Toggle_cmd_t *Msg)
     } 
     else 
     {
-        CFE_EVS_SendEvent(GENERIC_THRUSTER_TOGGLE_ERR_EID, CFE_EVS_EventType_ERROR, "GENERIC_THRUSTER: Cannot toggle thruster, they are disabled");
+        CFE_EVS_SendEvent(GENERIC_THRUSTER_PERCENTAGE_ERR_EID, CFE_EVS_EventType_ERROR, "GENERIC_THRUSTER: Cannot turn thruster on, they are disabled");
     }
 }
 
