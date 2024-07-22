@@ -32,7 +32,7 @@ COMMAND GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC BIG_ENDIAN "Generic_thru
   APPEND_PARAMETER CCSDS_LENGTH        16 UINT MIN_UINT16 MAX_UINT16 3      "CCSDS Packet Data Length" 
   APPEND_PARAMETER CCSDS_FC            8  UINT MIN_UINT8 MAX_UINT8 4        "CCSDS Command Function Code" 
   APPEND_PARAMETER CCSDS_CHECKSUM      8  UINT MIN_UINT8 MAX_UINT8 0        "CCSDS Command Checksum"
-  APPEND_PARAMETER THRUSTER_NUMBER     8  UINT 0 5 0                        "Thruster number"
+  APPEND_PARAMETER THRUSTER_NUMBER     8  UINT 0 3 0                        "Thruster number"
   APPEND_PARAMETER PERCENTAGE          8  UINT 0 100 0                      "Percentage of full thrust, 0 to 100"
 
 COMMAND GENERIC_THRUSTER GENERIC_THRUSTER_REQ_HK BIG_ENDIAN "Generic_thruster Request HK Packet Command"
