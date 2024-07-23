@@ -25,7 +25,6 @@
 
 #include "hwlib.h"
 #include "device_cfg.h"
-#include "generic_thruster_device.h"
 
 
 /*

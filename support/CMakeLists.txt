@@ -32,7 +32,6 @@ include_directories("../../../fsw/apps/hwlib/fsw/public_inc")
 
 set(generic_thruster_checkout_src
   generic_thruster_checkout.c 
-  ../fsw/src/generic_thruster_device.c
 )
 
 if(${TGTNAME} STREQUAL cpu1)

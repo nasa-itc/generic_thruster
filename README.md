@@ -3,7 +3,7 @@ This repository contains the NOS3 Generic Thruster Component.
 This includes flight software (FSW), ground software (GSW), simulation, and support directories.
 
 ## Overview
-The generic thruster is a UART device that can be used to command the thrusters on and off.  The available flight software is for use in the core Flight System (cFS) while the ground software supports COSMOS.  A NOS3 simulation is available which uses a 42 data provider.
+The generic thruster is a UART device that can be used to command the thruster percentage on.  The available flight software is for use in the core Flight System (cFS) while the ground software supports COSMOS.  A NOS3 simulation is available which uses a 42 data provider.
 
 ## Mechanical
 ### Reference System
@@ -22,9 +22,7 @@ All commands received by the device are echoed back to the sender to confirm rec
 Device commands are all formatted in the same manner and are fixed in size:
 * uint16, 0xDEAD
 * uint8, thruster number
-* uint8, command
-  - (0) Thruster off
-  - (1) Thruster on
+* uint8, percentage of full thrust, 0-100
 * uint16, 0xBEEF
 
 # Configuration
@@ -46,30 +44,6 @@ The 42 data provider can be configured in the `nos3-simulator.xml`:
                 <retry-wait-seconds>1</retry-wait-seconds>
             </data-provider>
 ```
-
-
-# Standalone
-To build the standalone version, assuming starting from top level NOS3 repository:
-* make debug
-* cd ./components/generic_thruster/support
-* mkdir build
-* cd build
-* cmake .. 
-  * Can override target selection by adding `-DTGTNAME=cpu1`
-* make
-
-To run the standalone version, assuming starting from the top level NOS3 repository:
-* Follow the build steps above
-* cd ../../../..
-* exit
-* Add generic_thruster_sim to docker_launch.sh
-* make launch
-  * Launches NOS Engine, NOS Time Driver, NOS Terminal, Generic_thruster Sim, and many other sims
-* make debug
-* cd components/generic_thruster/support/build
-* ./generic_thruster_checkout
-* exit
-* make stop
 
 ## Releases
 We use [SemVer](http://semver.org/) for versioning. For the versions available, see the tags on this repository.
