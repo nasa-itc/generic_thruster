@@ -25,6 +25,12 @@ Device commands are all formatted in the same manner and are fixed in size:
 * uint8, percentage of full thrust, 0-100
 * uint16, 0xBEEF
 
+# Running the Application
+1. Run NOS3
+1. Send the command to enable the thrusters
+1. Send command(s) to set thruster (0 to 3) to a percentage of full thrust
+1. Observe the spacecraft reacts and rotates and/or translates.
+
 # Configuration
 The various configuration parameters available for each portion of the component are captured below.
 
@@ -44,6 +50,8 @@ The 42 data provider can be configured in the `nos3-simulator.xml`:
                 <retry-wait-seconds>1</retry-wait-seconds>
             </data-provider>
 ```
+
+42 is initially configured with 4 thrusters, attached to 4 nodes of body 0 in the spacecraft SC_* file.
 
 ## Releases
 We use [SemVer](http://semver.org/) for versioning. For the versions available, see the tags on this repository.
