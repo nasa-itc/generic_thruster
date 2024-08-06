@@ -14,7 +14,6 @@
 
 /*
 ** Ground Command Codes
-** TODO: Add additional commands required by the specific component
 */
 #define GENERIC_THRUSTER_NOOP_CC                 0
 #define GENERIC_THRUSTER_RESET_COUNTERS_CC       1
@@ -24,7 +23,6 @@
 
 /* 
 ** Telemetry Request Command Codes
-** TODO: Add additional commands required by the specific component
 */
 #define GENERIC_THRUSTER_REQ_HK_TLM              0
 #define GENERIC_THRUSTER_REQ_DATA_TLM            1
@@ -68,10 +66,6 @@ typedef struct
     uint8   CommandCount;
     uint8   DeviceErrorCount;
     uint8   DeviceCount;
-  
-    /*
-    ** TODO: Edit and add specific telemetry values to this struct
-    */
     uint8   DeviceEnabled;
 
 } __attribute__((packed)) GENERIC_THRUSTER_Hk_tlm_t;

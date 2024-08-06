@@ -148,11 +148,6 @@ int32 GENERIC_THRUSTER_AppInit(void)
         return status;
     }
 
-    /*
-    ** TODO: Subscribe to any other messages here
-    */
-
-
     /* 
     ** Initialize the published HK message - this HK message will contain the 
     ** telemetry that has been defined in the GENERIC_THRUSTER_HkTelemetryPkt for this app.
@@ -160,11 +155,6 @@ int32 GENERIC_THRUSTER_AppInit(void)
     CFE_MSG_Init(CFE_MSG_PTR(GENERIC_THRUSTER_AppData.HkTelemetryPkt.TlmHeader),
                    CFE_SB_ValueToMsgId(GENERIC_THRUSTER_HK_TLM_MID),
                    GENERIC_THRUSTER_HK_TLM_LNGTH);
-
-    /*
-    ** TODO: Initialize any other messages that this app will publish
-    */
-
 
     /* 
     ** Always reset all counters during application initialization 
@@ -301,6 +291,9 @@ void GENERIC_THRUSTER_ProcessGroundCommand(CFE_MSG_Message_t * Msg)
             }
             break;
 
+        /*
+        ** Thrust Percentage Command
+        */
         case GENERIC_THRUSTER_PERCENTAGE_CC:
             if (GENERIC_THRUSTER_VerifyCmdLength(GENERIC_THRUSTER_AppData.MsgPtr, sizeof(GENERIC_THRUSTER_Percentage_cmd_t)) == OS_SUCCESS)
             {
@@ -308,10 +301,6 @@ void GENERIC_THRUSTER_ProcessGroundCommand(CFE_MSG_Message_t * Msg)
                 GENERIC_THRUSTER_Percentage((GENERIC_THRUSTER_Percentage_cmd_t *)Msg);
             }
             break;
-
-        /*
-        ** TODO: Edit and add more command codes as appropriate for the application
-        */
 
         /*
         ** Invalid Command Codes
@@ -328,8 +317,7 @@ void GENERIC_THRUSTER_ProcessGroundCommand(CFE_MSG_Message_t * Msg)
 
 
 /*
-** Process Telemetry Request - Triggered in response to a telemetery request
-** TODO: Add additional telemetry required by the specific component
+** Process Telemetry Request - Triggered in response to a telemetry request
 */
 void GENERIC_THRUSTER_ProcessTelemetryRequest(void)
 {
