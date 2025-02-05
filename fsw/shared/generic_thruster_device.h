@@ -32,18 +32,6 @@
 #define GENERIC_THRUSTER_DEVICE_CMD_SIZE         6
 
 /*
-** GENERIC_THRUSTER device housekeeping telemetry definition
-*/
-typedef struct
-{
-    uint8_t   DeviceErrorCount;
-    uint8_t   DeviceCount;
-
-} __attribute__((packed)) GENERIC_THRUSTER_Device_HK_tlm_t;
-#define GENERIC_THRUSTER_DEVICE_HK_LNGTH sizeof ( GENERIC_THRUSTER_Device_HK_tlm_t )
-#define GENERIC_THRUSTER_DEVICE_HK_SIZE GENERIC_THRUSTER_DEVICE_HK_LNGTH + GENERIC_THRUSTER_DEVICE_HDR_TRL_LEN
-
-/*
 ** Prototypes
 */
 int32_t GENERIC_THRUSTER_SetPercentage(uart_info_t *device, uint8_t thruster_number, uint8_t percentage, uint8_t data_length);
