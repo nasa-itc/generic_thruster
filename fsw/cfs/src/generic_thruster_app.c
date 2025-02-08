@@ -456,16 +456,8 @@ void GENERIC_THRUSTER_Percentage(GENERIC_THRUSTER_Percentage_cmd_t *Msg)
     if (GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceEnabled == GENERIC_THRUSTER_DEVICE_ENABLED)
     {
         int32_t status;
-        uint8_t request[6];
         CFE_EVS_SendEvent(GENERIC_THRUSTER_PERCENTAGE_INF_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_THRUSTER: Thruster %d, percentage on %d", Msg->ThrusterNumber, Msg->Percentage);
-//        sprintf(request, "DEAD%1.1d%1.1dBEEF", Msg->ThrusterNumber, Msg->Percentage);
-        request[0] = 0xDE;
-        request[1] = 0xAD;
-        request[2] = Msg->ThrusterNumber;
-        request[3] = Msg->Percentage;
-        request[4] = 0xBE;
-        request[5] = 0xEF;
-        status = uart_write_port(&GENERIC_THRUSTER_AppData.Generic_thrusterUart, (uint8_t*)request, 6);
+        status = GENERIC_THRUSTER_SetPercentage(&GENERIC_THRUSTER_AppData.Generic_thrusterUart, Msg->ThrusterNumber, Msg->Percentage, 6);
         if (status < 0) {
             GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceErrorCount++;
             CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_PERCENTAGE_EID, CFE_EVS_EventType_ERROR, "GENERIC_THRUSTER: Error writing to UART=%d\n", status);

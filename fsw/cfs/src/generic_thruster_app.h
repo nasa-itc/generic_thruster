@@ -12,6 +12,7 @@
 ** Include Files
 */
 #include "cfe.h"
+#include "generic_thruster_device.h"
 #include "generic_thruster_events.h"
 #include "generic_thruster_platform_cfg.h"
 #include "generic_thruster_perfids.h"
