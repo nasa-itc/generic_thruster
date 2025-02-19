@@ -148,11 +148,6 @@ int32 GENERIC_THRUSTER_AppInit(void)
         return status;
     }
 
-    /*
-    ** TODO: Subscribe to any other messages here
-    */
-
-
     /* 
     ** Initialize the published HK message - this HK message will contain the 
     ** telemetry that has been defined in the GENERIC_THRUSTER_HkTelemetryPkt for this app.
@@ -160,11 +155,6 @@ int32 GENERIC_THRUSTER_AppInit(void)
     CFE_MSG_Init(CFE_MSG_PTR(GENERIC_THRUSTER_AppData.HkTelemetryPkt.TlmHeader),
                    CFE_SB_ValueToMsgId(GENERIC_THRUSTER_HK_TLM_MID),
                    GENERIC_THRUSTER_HK_TLM_LNGTH);
-
-    /*
-    ** TODO: Initialize any other messages that this app will publish
-    */
-
 
     /* 
     ** Always reset all counters during application initialization 
@@ -301,6 +291,9 @@ void GENERIC_THRUSTER_ProcessGroundCommand(CFE_MSG_Message_t * Msg)
             }
             break;
 
+        /*
+        ** Thrust Percentage Command
+        */
         case GENERIC_THRUSTER_PERCENTAGE_CC:
             if (GENERIC_THRUSTER_VerifyCmdLength(GENERIC_THRUSTER_AppData.MsgPtr, sizeof(GENERIC_THRUSTER_Percentage_cmd_t)) == OS_SUCCESS)
             {
@@ -308,10 +301,6 @@ void GENERIC_THRUSTER_ProcessGroundCommand(CFE_MSG_Message_t * Msg)
                 GENERIC_THRUSTER_Percentage((GENERIC_THRUSTER_Percentage_cmd_t *)Msg);
             }
             break;
-
-        /*
-        ** TODO: Edit and add more command codes as appropriate for the application
-        */
 
         /*
         ** Invalid Command Codes
@@ -328,8 +317,7 @@ void GENERIC_THRUSTER_ProcessGroundCommand(CFE_MSG_Message_t * Msg)
 
 
 /*
-** Process Telemetry Request - Triggered in response to a telemetery request
-** TODO: Add additional telemetry required by the specific component
+** Process Telemetry Request - Triggered in response to a telemetry request
 */
 void GENERIC_THRUSTER_ProcessTelemetryRequest(void)
 {
@@ -468,16 +456,8 @@ void GENERIC_THRUSTER_Percentage(GENERIC_THRUSTER_Percentage_cmd_t *Msg)
     if (GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceEnabled == GENERIC_THRUSTER_DEVICE_ENABLED)
     {
         int32_t status;
-        uint8_t request[6];
         CFE_EVS_SendEvent(GENERIC_THRUSTER_PERCENTAGE_INF_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_THRUSTER: Thruster %d, percentage on %d", Msg->ThrusterNumber, Msg->Percentage);
-//        sprintf(request, "DEAD%1.1d%1.1dBEEF", Msg->ThrusterNumber, Msg->Percentage);
-        request[0] = 0xDE;
-        request[1] = 0xAD;
-        request[2] = Msg->ThrusterNumber;
-        request[3] = Msg->Percentage;
-        request[4] = 0xBE;
-        request[5] = 0xEF;
-        status = uart_write_port(&GENERIC_THRUSTER_AppData.Generic_thrusterUart, (uint8_t*)request, 6);
+        status = GENERIC_THRUSTER_SetPercentage(&GENERIC_THRUSTER_AppData.Generic_thrusterUart, Msg->ThrusterNumber, Msg->Percentage, 6);
         if (status < 0) {
             GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceErrorCount++;
             CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_PERCENTAGE_EID, CFE_EVS_EventType_ERROR, "GENERIC_THRUSTER: Error writing to UART=%d\n", status);
