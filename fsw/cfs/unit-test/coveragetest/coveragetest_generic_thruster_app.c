@@ -302,6 +302,19 @@ void Test_GENERIC_THRUSTER_ProcessCommandPacket(void)
     GENERIC_THRUSTER_ProcessCommandPacket();
     UtAssert_True(EventTest.MatchCount == 1, "GENERIC_THRUSTER_CMD_ERR_EID generated (%u)",
                   (unsigned int)EventTest.MatchCount);
+
+
+    /* RequestHK id */
+    TestMsgId = CFE_SB_ValueToMsgId(GENERIC_THRUSTER_CMD_MID);
+    FcnCode   = GENERIC_THRUSTER_REQ_HK_TLM;
+    MsgSize   = sizeof(TestMsg.Noop);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &MsgSize, sizeof(MsgSize), false);
+    GENERIC_THRUSTER_ProcessCommandPacket();
+    UtAssert_True(EventTest.MatchCount == 0, "GENERIC_THRUSTER_CMD_ERR_EID not generated (%u)",
+                  (unsigned int)EventTest.MatchCount);
 }
 
 void Test_GENERIC_THRUSTER_ProcessGroundCommand(void)
@@ -320,6 +333,7 @@ void Test_GENERIC_THRUSTER_ProcessGroundCommand(void)
         CFE_SB_Buffer_t           SBBuf;
         GENERIC_THRUSTER_NoArgs_cmd_t       Noop;
         GENERIC_THRUSTER_NoArgs_cmd_t       Reset;
+        GENERIC_THRUSTER_Percentage_cmd_t       Percentage;
     } TestMsg;
     UT_CheckEvent_t EventTest;
 
@@ -365,6 +379,41 @@ void Test_GENERIC_THRUSTER_ProcessGroundCommand(void)
     UT_CheckEvent_Setup(&EventTest, GENERIC_THRUSTER_CMD_ERR_EID, NULL);
     GENERIC_THRUSTER_ProcessGroundCommand(Msg);
     UtAssert_True(EventTest.MatchCount == 1, "GENERIC_THRUSTER_CMD_ERR_EID generated (%u)",
+                  (unsigned int)EventTest.MatchCount);
+
+    /* test dispatch of ENABLE */
+    FcnCode = GENERIC_THRUSTER_ENABLE_CC;
+    Size    = sizeof(TestMsg.Reset);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
+    UT_CheckEvent_Setup(&EventTest, GENERIC_THRUSTER_CMD_RESET_INF_EID, NULL);
+    GENERIC_THRUSTER_ProcessGroundCommand(Msg);
+    UtAssert_True(EventTest.MatchCount == 1, "GENERIC_THRUSTER_CMD_ENABLE_INF_EID generated (%u)",
+                  (unsigned int)EventTest.MatchCount);
+
+    /* test dispatch of DISABLE */
+    FcnCode = GENERIC_THRUSTER_DISABLE_CC;
+    Size    = sizeof(TestMsg.Reset);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
+    UT_CheckEvent_Setup(&EventTest, GENERIC_THRUSTER_CMD_DISABLE_INF_EID, NULL);
+    GENERIC_THRUSTER_ProcessGroundCommand(Msg);
+    UtAssert_True(EventTest.MatchCount == 1, "GENERIC_THRUSTER_CMD_DISABLE_INF_EID generated (%u)",
+                  (unsigned int)EventTest.MatchCount);
+    
+    /* test dispatch of PERCENTAGE */
+    TestMsg.Percentage.Percentage = 1;
+    TestMsg.Percentage.ThrusterNumber = 1;
+    FcnCode = GENERIC_THRUSTER_PERCENTAGE_CC;
+    Size    = sizeof(TestMsg.Percentage);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
+    UT_CheckEvent_Setup(&EventTest, GENERIC_THRUSTER_CMD_PERCENTAGE_INF_EID, NULL);
+    GENERIC_THRUSTER_ProcessGroundCommand(Msg);
+    UtAssert_True(EventTest.MatchCount == 1, "GENERIC_THRUSTER_CMD_PERCENTAGE_INF_EID generated (%u)",
                   (unsigned int)EventTest.MatchCount);
 }
 
