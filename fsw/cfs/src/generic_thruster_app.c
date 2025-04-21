@@ -248,6 +248,9 @@ void GENERIC_THRUSTER_ProcessGroundCommand(CFE_MSG_Message_t *Msg)
             if (GENERIC_THRUSTER_VerifyCmdLength(GENERIC_THRUSTER_AppData.MsgPtr,
                                                  sizeof(GENERIC_THRUSTER_NoArgs_cmd_t)) == OS_SUCCESS)
             {
+                /* Increment command success or error counter, NOOP can only be successful */
+                GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandCount++;
+
                 /* Second, send EVS event on successful receipt ground commands*/
                 CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_NOOP_INF_EID, CFE_EVS_EventType_INFORMATION,
                                   "GENERIC_THRUSTER: NOOP command received");
@@ -388,6 +391,9 @@ void GENERIC_THRUSTER_Enable(void)
     /* Check that device is disabled */
     if (GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceEnabled == GENERIC_THRUSTER_DEVICE_DISABLED)
     {
+        /* Increment command success or error counter, NOOP can only be successful */
+        GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandCount++;
+        
         /*
         ** Initialize hardware interface data
         ** TODO: Make specific to your application depending on protocol in use
@@ -417,7 +423,8 @@ void GENERIC_THRUSTER_Enable(void)
     }
     else
     {
-        GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceErrorCount++;
+        /* Increment command error count */
+        GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandErrorCount++;
         CFE_EVS_SendEvent(GENERIC_THRUSTER_ENABLE_ERR_EID, CFE_EVS_EventType_ERROR,
                           "GENERIC_THRUSTER: Device enable failed, already enabled");
     }
@@ -435,6 +442,9 @@ void GENERIC_THRUSTER_Disable(void)
     /* Check that device is enabled */
     if (GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceEnabled == GENERIC_THRUSTER_DEVICE_ENABLED)
     {
+        /* Increment command success counter */
+        GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandCount++;
+
         /* Open device specific protocols */
         status = uart_close_port(&GENERIC_THRUSTER_AppData.Generic_thrusterUart);
         if (status == OS_SUCCESS)
@@ -453,7 +463,7 @@ void GENERIC_THRUSTER_Disable(void)
     }
     else
     {
-        GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceErrorCount++;
+        GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandErrorCount++;
         CFE_EVS_SendEvent(GENERIC_THRUSTER_DISABLE_ERR_EID, CFE_EVS_EventType_ERROR,
                           "GENERIC_THRUSTER: Device disable failed, already disabled");
     }
@@ -477,7 +487,8 @@ void GENERIC_THRUSTER_Percentage(GENERIC_THRUSTER_Percentage_cmd_t *Msg)
         }
         else
         {
-            GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceCount++;
+            /* Increment command success counter */
+            GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandCount++;
             /* Read the reply */
             /*uint8_t DataBuffer[1024];
             int32 DataLen;
@@ -493,6 +504,8 @@ void GENERIC_THRUSTER_Percentage(GENERIC_THRUSTER_Percentage_cmd_t *Msg)
     }
     else
     {
+        /* Increment command error count */
+        GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandErrorCount++;
         CFE_EVS_SendEvent(GENERIC_THRUSTER_PERCENTAGE_ERR_EID, CFE_EVS_EventType_ERROR,
                           "GENERIC_THRUSTER: Cannot turn thruster on, they are disabled");
     }
@@ -509,12 +522,7 @@ int32 GENERIC_THRUSTER_VerifyCmdLength(CFE_MSG_Message_t *msg, uint16 expected_l
     size_t            actual_length = 0;
 
     CFE_MSG_GetSize(msg, &actual_length);
-    if (expected_length == actual_length)
-    {
-        /* Increment the command counter upon receipt of an invalid command */
-        GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandCount++;
-    }
-    else
+    if (expected_length != actual_length)
     {
         CFE_MSG_GetMsgId(msg, &msg_id);
         CFE_MSG_GetFcnCode(msg, &cmd_code);
