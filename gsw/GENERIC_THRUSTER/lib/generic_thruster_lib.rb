@@ -20,12 +20,6 @@ def get_generic_thruster_hk()
     sleep(GENERIC_THRUSTER_CMD_SLEEP)
 end
 
-def get_generic_thruster_data()
-    cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC")
-    wait_check_packet("GENERIC_THRUSTER", "GENERIC_THRUSTER_PERCENTAGE_CC", 1, GENERIC_THRUSTER_RESPONSE_TIMEOUT)
-    sleep(GENERIC_THRUSTER_CMD_SLEEP)
-end
-
 def generic_thruster_cmd(*command)
     count = tlm("GENERIC_THRUSTER GENERIC_THRUSTER_HK_TLM CMD_COUNT") + 1
 
@@ -79,11 +73,8 @@ def confirm_generic_thruster_data()
     dev_cmd_cnt = tlm("GENERIC_THRUSTER GENERIC_THRUSTER_HK_TLM DEVICE_COUNT")
     dev_cmd_err_cnt = tlm("GENERIC_THRUSTER GENERIC_THRUSTER_HK_TLM DEVICE_ERR_COUNT")
 
-    get_generic_thruster_data()
+    get_generic_thruster_hk()
     # Note these checks assume default simulator configuration
-    raw_x = tlm("GENERIC_THRUSTER GENERIC_THRUSTER_DATA_TLM RAW_GENERIC_THRUSTER_X")
-    check("GENERIC_THRUSTER GENERIC_THRUSTER_DATA_TLM RAW_GENERIC_THRUSTER_Y >= #{raw_x*2}")
-    check("GENERIC_THRUSTER GENERIC_THRUSTER_DATA_TLM RAW_GENERIC_THRUSTER_Z >= #{raw_x*3}")
 
     get_generic_thruster_hk()
     check("GENERIC_THRUSTER GENERIC_THRUSTER_HK_TLM DEVICE_COUNT >= #{dev_cmd_cnt}")
@@ -94,4 +85,26 @@ def confirm_generic_thruster_data_loop()
     GENERIC_THRUSTER_DEVICE_LOOP_COUNT.times do |n|
         confirm_generic_thruster_data()
     end
+end
+
+#
+# Simulator Functions
+#
+def generic_thruster_prepare_ast()
+    # Get to known state
+    safe_generic_thruster()
+
+    # Enable
+    enable_generic_thruster()
+
+    # Confirm data
+    confirm_generic_thruster_data_loop()
+end
+
+def generic_thruster_sim_enable()
+    cmd("SIM_CMDBUS_BRIDGE SAMPLE_SIM_ENABLE")
+end
+
+def generic_thruster_sim_disable()
+    cmd("SIM_CMDBUS_BRIDGE SAMPLE_SIM_DISABLE")
 end
