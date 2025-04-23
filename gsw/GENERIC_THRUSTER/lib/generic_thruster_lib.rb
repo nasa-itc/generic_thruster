@@ -9,7 +9,7 @@ GENERIC_THRUSTER_CMD_SLEEP = 0.25
 GENERIC_THRUSTER_RESPONSE_TIMEOUT = 5
 GENERIC_THRUSTER_TEST_LOOP_COUNT = 1
 GENERIC_THRUSTER_DEVICE_LOOP_COUNT = 5
-
+GENERIC_THRUSTER_DIFF = 0.00000005
 
 #
 # Functions
@@ -75,24 +75,77 @@ def confirm_generic_thruster_data()
 
     get_generic_thruster_hk()
     # Note these checks assume default simulator configuration
-    # X Axis Linear
-    truth_42_ACC_X_initial = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA ACC_B_X")
-    generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 0, PERCENTAGE 100")
-    generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 1, PERCENTAGE 100")
-    generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 2, PERCENTAGE 100")
-    generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 3, PERCENTAGE 100")
-    sleep(5)
-    check("GENERIC_THRUSTER GENERIC_THRUSTER_HK_TLM DEVICE_COUNT > #{truth_42_ACC_X_initial}")
-    truth_42_ACC_X_all_on = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA ACC_B_X")
-    generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 0, PERCENTAGE 0")
-    generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 1, PERCENTAGE 0")
-    generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 2, PERCENTAGE 0")
-    generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 3, PERCENTAGE 0")
-    check("GENERIC_THRUSTER GENERIC_THRUSTER_HK_TLM DEVICE_COUNT < #{truth_42_ACC_X_all_on}")
 
-    #check_tolerance("GENERIC_IMU GENERIC_IMU_DATA_TLM X_LINEAR_ACCELERATION", truth_42_ACC_X_initial, GENERIC_IMU_DEVICE_LINEAR_DIFF)
+    # Thruster 0    
+    truth_42_GYRO_X_initial = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_0").abs()
+    truth_42_GYRO_Y_initial = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_1").abs()
+    truth_42_GYRO_Z_initial = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_2").abs()
+    generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 0, PERCENTAGE 10")
+    sleep(10)
+    generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 0, PERCENTAGE 0")
+    truth_42_GYRO_X_current = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_0").abs()
+    truth_42_GYRO_Y_current = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_1").abs()
+    truth_42_GYRO_Z_current = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_2").abs()
+    if truth_42_GYRO_Y_current <= truth_42_GYRO_Y_initial        
+        raise "truth_42_GYRO_Y_current > range_y Failed!"
+    end
+    if truth_42_GYRO_Z_current <= truth_42_GYRO_Z_initial        
+        raise "truth_42_GYRO_X_current > range_z Failed!"
+    end
+
+    # Thruster 1   
+    truth_42_GYRO_X_initial = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_0").abs()
+    truth_42_GYRO_Y_initial = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_1").abs()
+    truth_42_GYRO_Z_initial = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_2").abs()
+    generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 1, PERCENTAGE 10")
+    sleep(10)
+    generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 1, PERCENTAGE 0")
+    truth_42_GYRO_X_current = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_0").abs()
+    truth_42_GYRO_Y_current = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_1").abs()
+    truth_42_GYRO_Z_current = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_2").abs()
+    if truth_42_GYRO_Y_current <= truth_42_GYRO_Y_initial        
+        raise "truth_42_GYRO_Y_current > range_y Failed!"
+    end
+    if truth_42_GYRO_Z_current <= truth_42_GYRO_Z_initial        
+        raise "truth_42_GYRO_X_current > range_z Failed!"
+    end
+
+    # Thruster 2
+    truth_42_GYRO_X_initial = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_0").abs()
+    truth_42_GYRO_Y_initial = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_1").abs()
+    truth_42_GYRO_Z_initial = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_2").abs()
+    generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 2, PERCENTAGE 10")
+    sleep(10)
+    generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 2, PERCENTAGE 0")
+    truth_42_GYRO_X_current = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_0").abs()
+    truth_42_GYRO_Y_current = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_1").abs()
+    truth_42_GYRO_Z_current = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_2").abs()
+    if truth_42_GYRO_Y_current <= truth_42_GYRO_Y_initial        
+        raise "truth_42_GYRO_Y_current > range_y Failed!"
+    end
+    if truth_42_GYRO_Z_current <= truth_42_GYRO_Z_initial        
+        raise "truth_42_GYRO_X_current > range_z Failed!"
+    end
     
-    get_generic_thruster_hk()
+    # Thruster 3
+    truth_42_GYRO_X_initial = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_0").abs()
+    truth_42_GYRO_Y_initial = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_1").abs()
+    truth_42_GYRO_Z_initial = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_2").abs()
+    generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 3, PERCENTAGE 10")
+    sleep(10)
+    generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 3, PERCENTAGE 0")
+    truth_42_GYRO_X_current = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_0").abs()
+    truth_42_GYRO_Y_current = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_1").abs()
+    truth_42_GYRO_Z_current = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_2").abs()
+    if truth_42_GYRO_Y_current <= truth_42_GYRO_Y_initial        
+        raise "truth_42_GYRO_Y_current > range_y Failed!"
+    end
+    if truth_42_GYRO_Z_current <= truth_42_GYRO_Z_initial        
+        raise "truth_42_GYRO_X_current > range_z Failed!"
+    end
+
+
+
     check("GENERIC_THRUSTER GENERIC_THRUSTER_HK_TLM DEVICE_COUNT >= #{dev_cmd_cnt}")
     check("GENERIC_THRUSTER GENERIC_THRUSTER_HK_TLM DEVICE_ERR_COUNT == #{dev_cmd_err_cnt}")
 end
