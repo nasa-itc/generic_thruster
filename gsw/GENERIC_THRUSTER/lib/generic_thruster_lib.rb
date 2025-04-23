@@ -80,14 +80,12 @@ def confirm_generic_thruster_data()
     truth_42_GYRO_Y_initial = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_1").abs()
     truth_42_GYRO_Z_initial = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_2").abs()
 
-    generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 0, PERCENTAGE 100")
-    generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 2, PERCENTAGE 100")
+    generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 0, PERCENTAGE 10")
     sleep(3)
     truth_42_GYRO_X_current = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_0").abs() + GENERIC_THRUSTER_DIFF
     truth_42_GYRO_Y_current = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_1").abs() +  GENERIC_THRUSTER_DIFF
     truth_42_GYRO_Z_current = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_2").abs() +  GENERIC_THRUSTER_DIFF
     generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 0, PERCENTAGE 0")
-    generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 2, PERCENTAGE 0")
 
     if (truth_42_GYRO_X_current > truth_42_GYRO_X_initial) || (truth_42_GYRO_Y_current > truth_42_GYRO_Y_initial) ||(truth_42_GYRO_Z_current > truth_42_GYRO_Z_initial)  
 
