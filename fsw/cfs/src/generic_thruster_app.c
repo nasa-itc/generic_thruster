@@ -393,7 +393,7 @@ void GENERIC_THRUSTER_Enable(void)
     {
         /* Increment command success or error counter, NOOP can only be successful */
         GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandCount++;
-        
+
         /*
         ** Initialize hardware interface data
         ** TODO: Make specific to your application depending on protocol in use
