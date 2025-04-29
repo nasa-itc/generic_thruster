@@ -55,7 +55,6 @@ typedef struct
 
     /*
     ** Device protocol
-    ** TODO: Make specific to your application
     */
     uart_info_t Generic_thrusterUart; /* Hardware protocol definition */
 

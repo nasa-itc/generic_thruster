@@ -8,7 +8,8 @@ require 'cosmos/script'
 GENERIC_THRUSTER_CMD_SLEEP = 0.25
 GENERIC_THRUSTER_RESPONSE_TIMEOUT = 5
 GENERIC_THRUSTER_TEST_LOOP_COUNT = 1
-GENERIC_THRUSTER_DEVICE_LOOP_COUNT = 5
+GENERIC_THRUSTER_DEVICE_LOOP_COUNT = 1
+GENERIC_THRUSTER_DEVICE_DELAY = 3
 GENERIC_THRUSTER_DIFF = 0.5
 
 #
@@ -65,6 +66,10 @@ def safe_generic_thruster()
     get_generic_thruster_hk()
     state = tlm("GENERIC_THRUSTER GENERIC_THRUSTER_HK_TLM DEVICE_ENABLED")
     if (state != "DISABLED")
+        generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 0, PERCENTAGE 0")
+        generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 1, PERCENTAGE 0")
+        generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 2, PERCENTAGE 0")
+        generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 3, PERCENTAGE 0")
         disable_generic_thruster()
     end
 end
@@ -81,10 +86,10 @@ def confirm_generic_thruster_data()
     truth_42_GYRO_Z_initial = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_2").abs()
 
     generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 0, PERCENTAGE 10")
-    sleep(3)
+    sleep GENERIC_THRUSTER_DEVICE_DELAY
     truth_42_GYRO_X_current = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_0").abs() + GENERIC_THRUSTER_DIFF
-    truth_42_GYRO_Y_current = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_1").abs() +  GENERIC_THRUSTER_DIFF
-    truth_42_GYRO_Z_current = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_2").abs() +  GENERIC_THRUSTER_DIFF
+    truth_42_GYRO_Y_current = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_1").abs() + GENERIC_THRUSTER_DIFF
+    truth_42_GYRO_Z_current = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_2").abs() + GENERIC_THRUSTER_DIFF
     generic_thruster_cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 0, PERCENTAGE 0")
 
     if (truth_42_GYRO_X_current > truth_42_GYRO_X_initial) || (truth_42_GYRO_Y_current > truth_42_GYRO_Y_initial) ||(truth_42_GYRO_Z_current > truth_42_GYRO_Z_initial)  

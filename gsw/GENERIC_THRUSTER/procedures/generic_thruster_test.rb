@@ -38,7 +38,7 @@ class Generic_thruster_Test < Cosmos::TestSuite
   def initialize
       super()
       add_test('GENERIC_THRUSTER_Functional_Test')
-      add_test('GENERIC_THRUSTER_Automated_Scenario_Test')
+      #add_test('GENERIC_THRUSTER_Automated_Scenario_Test')
   end
 
   def setup

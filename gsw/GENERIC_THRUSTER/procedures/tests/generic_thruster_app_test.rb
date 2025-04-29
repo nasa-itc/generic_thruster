@@ -64,3 +64,43 @@ for n in 6..(5 + GENERIC_THRUSTER_TEST_LOOP_COUNT)
     check("GENERIC_THRUSTER GENERIC_THRUSTER_HK_TLM CMD_COUNT == #{cmd_cnt}")
     check("GENERIC_THRUSTER GENERIC_THRUSTER_HK_TLM CMD_ERR_COUNT == #{cmd_err_cnt+1}")
 end
+
+
+##
+##   Device testing
+##
+
+## Prepare
+#cmd("GENERIC_ADCS GENERIC_ADCS_SET_MODE_CC with GNC_MODE PASSIVE")
+#cmd("GENERIC_THRUSTER GENERIC_THRUSTER_ENABLE_CC")
+#
+## Get baseline degrees per second (DPS) from SIM_42_TRUTH
+#pre_x = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_X_DPS")
+#pre_y = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_Y_DPS")
+#pre_z = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_Z_DPS")
+#
+## +X rotation via thrusters 0 and 2
+#cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 0, PERCENTAGE 100")
+#cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 2, PERCENTAGE 100")
+#sleep 15
+#cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 0, PERCENTAGE 0")
+#cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 2, PERCENTAGE 0")
+#post_x = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_X_DPS")
+#post_y = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_Y_DPS")
+#post_z = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_Z_DPS")
+#puts "pre_x = #{pre_x}   ;   post_x #{post_x}"
+#puts "pre_y = #{pre_y}   ;   post_y #{post_y}"
+#puts "pre_z = #{pre_z}   ;   post_z #{post_z}"
+#
+## +X rotation via thrusters 1 and 3
+#cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 1, PERCENTAGE 100")
+#cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 3, PERCENTAGE 100")
+#sleep 15
+#cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 1, PERCENTAGE 0")
+#cmd("GENERIC_THRUSTER GENERIC_THRUSTER_PERCENTAGE_CC with THRUSTER_NUMBER 3, PERCENTAGE 0")
+#post_x = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_X_DPS")
+#post_y = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_Y_DPS")
+#post_z = tlm("SIM_42_TRUTH SIM_42_TRUTH_DATA WN_Z_DPS")
+#puts "pre_x = #{pre_x}   ;   post_x #{post_x}"
+#puts "pre_y = #{pre_y}   ;   post_y #{post_y}"
+#puts "pre_z = #{pre_z}   ;   post_z #{post_z}"

@@ -218,7 +218,6 @@ void GENERIC_THRUSTER_ProcessCommandPacket(void)
 
 /*
 ** Process ground commands
-** TODO: Add additional commands required by the specific component
 */
 void GENERIC_THRUSTER_ProcessGroundCommand(CFE_MSG_Message_t *Msg)
 {
@@ -382,7 +381,6 @@ void GENERIC_THRUSTER_ResetCounters(void)
 
 /*
 ** Enable Component
-** TODO: Edit for your specific component implementation
 */
 void GENERIC_THRUSTER_Enable(void)
 {
@@ -391,12 +389,11 @@ void GENERIC_THRUSTER_Enable(void)
     /* Check that device is disabled */
     if (GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceEnabled == GENERIC_THRUSTER_DEVICE_DISABLED)
     {
-        /* Increment command success or error counter, NOOP can only be successful */
+        /* Increment command success or error counter */
         GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandCount++;
 
         /*
         ** Initialize hardware interface data
-        ** TODO: Make specific to your application depending on protocol in use
         ** Note that other components provide examples for the different protocols available
         */
         GENERIC_THRUSTER_AppData.Generic_thrusterUart.deviceString  = GENERIC_THRUSTER_CFG_STRING;
@@ -433,7 +430,6 @@ void GENERIC_THRUSTER_Enable(void)
 
 /*
 ** Disable Component
-** TODO: Edit for your specific component implementation
 */
 void GENERIC_THRUSTER_Disable(void)
 {
