@@ -12,7 +12,6 @@
 #include <arpa/inet.h>
 #include "generic_thruster_app.h"
 
-
 /*
 ** Global Data
 */
@@ -30,7 +29,7 @@ void GENERIC_THR_AppMain(void)
     */
     CFE_ES_PerfLogEntry(GENERIC_THRUSTER_PERF_ID);
 
-    /* 
+    /*
     ** Perform application initialization
     */
     status = GENERIC_THRUSTER_AppInit();
@@ -49,13 +48,14 @@ void GENERIC_THR_AppMain(void)
         */
         CFE_ES_PerfLogExit(GENERIC_THRUSTER_PERF_ID);
 
-        /* 
+        /*
         ** Pend on the arrival of the next Software Bus message
         ** Note that this is the standard, but timeouts are available
         */
-        status = CFE_SB_ReceiveBuffer((CFE_SB_Buffer_t **)&GENERIC_THRUSTER_AppData.MsgPtr,  GENERIC_THRUSTER_AppData.CmdPipe,  CFE_SB_PEND_FOREVER);
-        
-        /* 
+        status = CFE_SB_ReceiveBuffer((CFE_SB_Buffer_t **)&GENERIC_THRUSTER_AppData.MsgPtr,
+                                      GENERIC_THRUSTER_AppData.CmdPipe, CFE_SB_PEND_FOREVER);
+
+        /*
         ** Begin performance metrics on anything after this line. This will help to determine
         ** where we are spending most of the time during this app execution.
         */
@@ -72,7 +72,8 @@ void GENERIC_THR_AppMain(void)
         }
         else
         {
-            CFE_EVS_SendEvent(GENERIC_THRUSTER_PIPE_ERR_EID, CFE_EVS_EventType_ERROR, "GENERIC_THRUSTER: SB Pipe Read Error = %d", (int) status);
+            CFE_EVS_SendEvent(GENERIC_THRUSTER_PIPE_ERR_EID, CFE_EVS_EventType_ERROR,
+                              "GENERIC_THRUSTER: SB Pipe Read Error = %d", (int)status);
             GENERIC_THRUSTER_AppData.RunStatus = CFE_ES_RunStatus_APP_ERROR;
         }
     }
@@ -91,39 +92,38 @@ void GENERIC_THR_AppMain(void)
     ** Exit the application
     */
     CFE_ES_ExitApp(GENERIC_THRUSTER_AppData.RunStatus);
-} 
+}
 
-
-/* 
+/*
 ** Initialize application
 */
 int32 GENERIC_THRUSTER_AppInit(void)
 {
     int32 status = OS_SUCCESS;
-    
+
     GENERIC_THRUSTER_AppData.RunStatus = CFE_ES_RunStatus_APP_RUN;
 
     /*
     ** Register the events
-    */ 
-    status = CFE_EVS_Register(NULL, 0, CFE_EVS_EventFilter_BINARY);    /* as default, no filters are used */
+    */
+    status = CFE_EVS_Register(NULL, 0, CFE_EVS_EventFilter_BINARY); /* as default, no filters are used */
     if (status != CFE_SUCCESS)
     {
-        CFE_ES_WriteToSysLog("GENERIC_THRUSTER: Error registering for event services: 0x%08X\n", (unsigned int) status);
-       return status;
+        CFE_ES_WriteToSysLog("GENERIC_THRUSTER: Error registering for event services: 0x%08X\n", (unsigned int)status);
+        return status;
     }
 
     /*
-    ** Create the Software Bus command pipe 
+    ** Create the Software Bus command pipe
     */
     status = CFE_SB_CreatePipe(&GENERIC_THRUSTER_AppData.CmdPipe, GENERIC_THRUSTER_PIPE_DEPTH, "GEN_THR");
     if (status != CFE_SUCCESS)
     {
-        CFE_EVS_SendEvent(GENERIC_THRUSTER_PIPE_ERR_EID, CFE_EVS_EventType_ERROR,
-            "Error Creating SB Pipe,RC=0x%08X",(unsigned int) status);
-       return status;
+        CFE_EVS_SendEvent(GENERIC_THRUSTER_PIPE_ERR_EID, CFE_EVS_EventType_ERROR, "Error Creating SB Pipe,RC=0x%08X",
+                          (unsigned int)status);
+        return status;
     }
-    
+
     /*
     ** Subscribe to ground commands
     */
@@ -131,8 +131,8 @@ int32 GENERIC_THRUSTER_AppInit(void)
     if (status != CFE_SUCCESS)
     {
         CFE_EVS_SendEvent(GENERIC_THRUSTER_SUB_CMD_ERR_EID, CFE_EVS_EventType_ERROR,
-            "Error Subscribing to HK Gnd Cmds, MID=0x%04X, RC=0x%08X",
-            GENERIC_THRUSTER_CMD_MID, (unsigned int) status);
+                          "Error Subscribing to HK Gnd Cmds, MID=0x%04X, RC=0x%08X", GENERIC_THRUSTER_CMD_MID,
+                          (unsigned int)status);
         return status;
     }
 
@@ -143,21 +143,20 @@ int32 GENERIC_THRUSTER_AppInit(void)
     if (status != CFE_SUCCESS)
     {
         CFE_EVS_SendEvent(GENERIC_THRUSTER_SUB_REQ_HK_ERR_EID, CFE_EVS_EventType_ERROR,
-            "Error Subscribing to HK Request, MID=0x%04X, RC=0x%08X",
-            GENERIC_THRUSTER_REQ_HK_MID, (unsigned int) status);
+                          "Error Subscribing to HK Request, MID=0x%04X, RC=0x%08X", GENERIC_THRUSTER_REQ_HK_MID,
+                          (unsigned int)status);
         return status;
     }
 
-    /* 
-    ** Initialize the published HK message - this HK message will contain the 
+    /*
+    ** Initialize the published HK message - this HK message will contain the
     ** telemetry that has been defined in the GENERIC_THRUSTER_HkTelemetryPkt for this app.
     */
     CFE_MSG_Init(CFE_MSG_PTR(GENERIC_THRUSTER_AppData.HkTelemetryPkt.TlmHeader),
-                   CFE_SB_ValueToMsgId(GENERIC_THRUSTER_HK_TLM_MID),
-                   GENERIC_THRUSTER_HK_TLM_LNGTH);
+                 CFE_SB_ValueToMsgId(GENERIC_THRUSTER_HK_TLM_MID), GENERIC_THRUSTER_HK_TLM_LNGTH);
 
-    /* 
-    ** Always reset all counters during application initialization 
+    /*
+    ** Always reset all counters during application initialization
     */
     GENERIC_THRUSTER_ResetCounters();
 
@@ -167,25 +166,21 @@ int32 GENERIC_THRUSTER_AppInit(void)
     */
     GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceEnabled = GENERIC_THRUSTER_DEVICE_DISABLED;
 
-    /* 
-     ** Send an information event that the app has initialized. 
+    /*
+     ** Send an information event that the app has initialized.
      ** This is useful for debugging the loading of individual applications.
      */
     status = CFE_EVS_SendEvent(GENERIC_THRUSTER_STARTUP_INF_EID, CFE_EVS_EventType_INFORMATION,
-               "GENERIC_THRUSTER App Initialized. Version %d.%d.%d.%d",
-                GENERIC_THRUSTER_MAJOR_VERSION,
-                GENERIC_THRUSTER_MINOR_VERSION, 
-                GENERIC_THRUSTER_REVISION, 
-                GENERIC_THRUSTER_MISSION_REV);	
+                               "GENERIC_THRUSTER App Initialized. Version %d.%d.%d.%d", GENERIC_THRUSTER_MAJOR_VERSION,
+                               GENERIC_THRUSTER_MINOR_VERSION, GENERIC_THRUSTER_REVISION, GENERIC_THRUSTER_MISSION_REV);
     if (status != CFE_SUCCESS)
     {
-        CFE_ES_WriteToSysLog("GENERIC_THRUSTER: Error sending initialization event: 0x%08X\n", (unsigned int) status);
+        CFE_ES_WriteToSysLog("GENERIC_THRUSTER: Error sending initialization event: 0x%08X\n", (unsigned int)status);
     }
     return status;
-} 
+}
 
-
-/* 
+/*
 ** Process packets received on the GENERIC_THRUSTER command pipe
 */
 void GENERIC_THRUSTER_ProcessCommandPacket(void)
@@ -209,25 +204,24 @@ void GENERIC_THRUSTER_ProcessCommandPacket(void)
             break;
 
         /*
-        ** All other invalid messages that this app doesn't recognize, 
-        ** increment the command error counter and log as an error event.  
+        ** All other invalid messages that this app doesn't recognize,
+        ** increment the command error counter and log as an error event.
         */
         default:
             GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandErrorCount++;
-            CFE_EVS_SendEvent(GENERIC_THRUSTER_PROCESS_CMD_ERR_EID,CFE_EVS_EventType_ERROR, "GENERIC_THRUSTER: Invalid command packet, MID = 0x%x", CFE_SB_MsgIdToValue(MsgId));
+            CFE_EVS_SendEvent(GENERIC_THRUSTER_PROCESS_CMD_ERR_EID, CFE_EVS_EventType_ERROR,
+                              "GENERIC_THRUSTER: Invalid command packet, MID = 0x%x", CFE_SB_MsgIdToValue(MsgId));
             break;
     }
     return;
-} 
-
+}
 
 /*
 ** Process ground commands
-** TODO: Add additional commands required by the specific component
 */
-void GENERIC_THRUSTER_ProcessGroundCommand(CFE_MSG_Message_t * Msg)
+void GENERIC_THRUSTER_ProcessGroundCommand(CFE_MSG_Message_t *Msg)
 {
-    CFE_SB_MsgId_t MsgId = CFE_SB_INVALID_MSG_ID;
+    CFE_SB_MsgId_t    MsgId       = CFE_SB_INVALID_MSG_ID;
     CFE_MSG_FcnCode_t CommandCode = 0;
 
     /*
@@ -247,13 +241,18 @@ void GENERIC_THRUSTER_ProcessGroundCommand(CFE_MSG_Message_t * Msg)
         */
         case GENERIC_THRUSTER_NOOP_CC:
             /*
-            ** First, verify the command length immediately after CC identification 
+            ** First, verify the command length immediately after CC identification
             ** Note that VerifyCmdLength handles the command and command error counters
             */
-            if (GENERIC_THRUSTER_VerifyCmdLength(GENERIC_THRUSTER_AppData.MsgPtr, sizeof(GENERIC_THRUSTER_NoArgs_cmd_t)) == OS_SUCCESS)
+            if (GENERIC_THRUSTER_VerifyCmdLength(GENERIC_THRUSTER_AppData.MsgPtr,
+                                                 sizeof(GENERIC_THRUSTER_NoArgs_cmd_t)) == OS_SUCCESS)
             {
+                /* Increment command success or error counter, NOOP can only be successful */
+                GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandCount++;
+
                 /* Second, send EVS event on successful receipt ground commands*/
-                CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_NOOP_INF_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_THRUSTER: NOOP command received");
+                CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_NOOP_INF_EID, CFE_EVS_EventType_INFORMATION,
+                                  "GENERIC_THRUSTER: NOOP command received");
                 /* Third, do the desired command action if applicable, in the case of NOOP it is no operation */
             }
             break;
@@ -262,9 +261,11 @@ void GENERIC_THRUSTER_ProcessGroundCommand(CFE_MSG_Message_t * Msg)
         ** Reset Counters Command
         */
         case GENERIC_THRUSTER_RESET_COUNTERS_CC:
-            if (GENERIC_THRUSTER_VerifyCmdLength(GENERIC_THRUSTER_AppData.MsgPtr, sizeof(GENERIC_THRUSTER_NoArgs_cmd_t)) == OS_SUCCESS)
+            if (GENERIC_THRUSTER_VerifyCmdLength(GENERIC_THRUSTER_AppData.MsgPtr,
+                                                 sizeof(GENERIC_THRUSTER_NoArgs_cmd_t)) == OS_SUCCESS)
             {
-                CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_RESET_INF_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_THRUSTER: RESET counters command received");
+                CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_RESET_INF_EID, CFE_EVS_EventType_INFORMATION,
+                                  "GENERIC_THRUSTER: RESET counters command received");
                 GENERIC_THRUSTER_ResetCounters();
             }
             break;
@@ -273,9 +274,11 @@ void GENERIC_THRUSTER_ProcessGroundCommand(CFE_MSG_Message_t * Msg)
         ** Enable Command
         */
         case GENERIC_THRUSTER_ENABLE_CC:
-            if (GENERIC_THRUSTER_VerifyCmdLength(GENERIC_THRUSTER_AppData.MsgPtr, sizeof(GENERIC_THRUSTER_NoArgs_cmd_t)) == OS_SUCCESS)
+            if (GENERIC_THRUSTER_VerifyCmdLength(GENERIC_THRUSTER_AppData.MsgPtr,
+                                                 sizeof(GENERIC_THRUSTER_NoArgs_cmd_t)) == OS_SUCCESS)
             {
-                CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_ENABLE_INF_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_THRUSTER: Enable command received");
+                CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_ENABLE_INF_EID, CFE_EVS_EventType_INFORMATION,
+                                  "GENERIC_THRUSTER: Enable command received");
                 GENERIC_THRUSTER_Enable();
             }
             break;
@@ -284,9 +287,11 @@ void GENERIC_THRUSTER_ProcessGroundCommand(CFE_MSG_Message_t * Msg)
         ** Disable Command
         */
         case GENERIC_THRUSTER_DISABLE_CC:
-            if (GENERIC_THRUSTER_VerifyCmdLength(GENERIC_THRUSTER_AppData.MsgPtr, sizeof(GENERIC_THRUSTER_NoArgs_cmd_t)) == OS_SUCCESS)
+            if (GENERIC_THRUSTER_VerifyCmdLength(GENERIC_THRUSTER_AppData.MsgPtr,
+                                                 sizeof(GENERIC_THRUSTER_NoArgs_cmd_t)) == OS_SUCCESS)
             {
-                CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_DISABLE_INF_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_THRUSTER: Disable command received");
+                CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_DISABLE_INF_EID, CFE_EVS_EventType_INFORMATION,
+                                  "GENERIC_THRUSTER: Disable command received");
                 GENERIC_THRUSTER_Disable();
             }
             break;
@@ -295,9 +300,11 @@ void GENERIC_THRUSTER_ProcessGroundCommand(CFE_MSG_Message_t * Msg)
         ** Thrust Percentage Command
         */
         case GENERIC_THRUSTER_PERCENTAGE_CC:
-            if (GENERIC_THRUSTER_VerifyCmdLength(GENERIC_THRUSTER_AppData.MsgPtr, sizeof(GENERIC_THRUSTER_Percentage_cmd_t)) == OS_SUCCESS)
+            if (GENERIC_THRUSTER_VerifyCmdLength(GENERIC_THRUSTER_AppData.MsgPtr,
+                                                 sizeof(GENERIC_THRUSTER_Percentage_cmd_t)) == OS_SUCCESS)
             {
-                CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_PERCENTAGE_INF_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_THRUSTER: Percentage command received");
+                CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_PERCENTAGE_INF_EID, CFE_EVS_EventType_INFORMATION,
+                                  "GENERIC_THRUSTER: Percentage command received");
                 GENERIC_THRUSTER_Percentage((GENERIC_THRUSTER_Percentage_cmd_t *)Msg);
             }
             break;
@@ -308,20 +315,20 @@ void GENERIC_THRUSTER_ProcessGroundCommand(CFE_MSG_Message_t * Msg)
         default:
             /* Increment the error counter upon receipt of an invalid command */
             GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandErrorCount++;
-            CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_ERR_EID, CFE_EVS_EventType_ERROR, 
-                "GENERIC_THRUSTER: Invalid command code for packet, MID = 0x%x, cmdCode = 0x%x", CFE_SB_MsgIdToValue(MsgId), CommandCode);
+            CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_ERR_EID, CFE_EVS_EventType_ERROR,
+                              "GENERIC_THRUSTER: Invalid command code for packet, MID = 0x%x, cmdCode = 0x%x",
+                              CFE_SB_MsgIdToValue(MsgId), CommandCode);
             break;
     }
     return;
-} 
-
+}
 
 /*
 ** Process Telemetry Request - Triggered in response to a telemetry request
 */
 void GENERIC_THRUSTER_ProcessTelemetryRequest(void)
 {
-    CFE_SB_MsgId_t MsgId = CFE_SB_INVALID_MSG_ID;
+    CFE_SB_MsgId_t    MsgId       = CFE_SB_INVALID_MSG_ID;
     CFE_MSG_FcnCode_t CommandCode = 0;
 
     /* MsgId is only needed if the command code is not recognized. See default case */
@@ -341,22 +348,22 @@ void GENERIC_THRUSTER_ProcessTelemetryRequest(void)
         default:
             /* Increment the error counter upon receipt of an invalid command */
             GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandErrorCount++;
-            CFE_EVS_SendEvent(GENERIC_THRUSTER_DEVICE_TLM_ERR_EID, CFE_EVS_EventType_ERROR, 
-                "GENERIC_THRUSTER: Invalid command code for packet, MID = 0x%x, cmdCode = 0x%x", CFE_SB_MsgIdToValue(MsgId), CommandCode);
+            CFE_EVS_SendEvent(GENERIC_THRUSTER_DEVICE_TLM_ERR_EID, CFE_EVS_EventType_ERROR,
+                              "GENERIC_THRUSTER: Invalid command code for packet, MID = 0x%x, cmdCode = 0x%x",
+                              CFE_SB_MsgIdToValue(MsgId), CommandCode);
             break;
     }
     return;
 }
 
-
-/* 
+/*
 ** Report Application Housekeeping
 */
 void GENERIC_THRUSTER_ReportHousekeeping(void)
 {
     /* Time stamp and publish housekeeping telemetry */
-    CFE_SB_TimeStampMsg((CFE_MSG_Message_t *) &GENERIC_THRUSTER_AppData.HkTelemetryPkt);
-    CFE_SB_TransmitMsg((CFE_MSG_Message_t *) &GENERIC_THRUSTER_AppData.HkTelemetryPkt, true);
+    CFE_SB_TimeStampMsg((CFE_MSG_Message_t *)&GENERIC_THRUSTER_AppData.HkTelemetryPkt);
+    CFE_SB_TransmitMsg((CFE_MSG_Message_t *)&GENERIC_THRUSTER_AppData.HkTelemetryPkt, true);
     return;
 }
 
@@ -366,16 +373,14 @@ void GENERIC_THRUSTER_ReportHousekeeping(void)
 void GENERIC_THRUSTER_ResetCounters(void)
 {
     GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandErrorCount = 0;
-    GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandCount = 0;
-    GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceErrorCount = 0;
-    GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceCount = 0;
+    GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandCount      = 0;
+    GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceErrorCount  = 0;
+    GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceCount       = 0;
     return;
-} 
-
+}
 
 /*
 ** Enable Component
-** TODO: Edit for your specific component implementation
 */
 void GENERIC_THRUSTER_Enable(void)
 {
@@ -384,15 +389,17 @@ void GENERIC_THRUSTER_Enable(void)
     /* Check that device is disabled */
     if (GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceEnabled == GENERIC_THRUSTER_DEVICE_DISABLED)
     {
+        /* Increment command success or error counter */
+        GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandCount++;
+
         /*
         ** Initialize hardware interface data
-        ** TODO: Make specific to your application depending on protocol in use
         ** Note that other components provide examples for the different protocols available
-        */ 
-        GENERIC_THRUSTER_AppData.Generic_thrusterUart.deviceString = GENERIC_THRUSTER_CFG_STRING;
-        GENERIC_THRUSTER_AppData.Generic_thrusterUart.handle = GENERIC_THRUSTER_CFG_HANDLE;
-        GENERIC_THRUSTER_AppData.Generic_thrusterUart.isOpen = PORT_CLOSED;
-        GENERIC_THRUSTER_AppData.Generic_thrusterUart.baud = GENERIC_THRUSTER_CFG_BAUDRATE_HZ;
+        */
+        GENERIC_THRUSTER_AppData.Generic_thrusterUart.deviceString  = GENERIC_THRUSTER_CFG_STRING;
+        GENERIC_THRUSTER_AppData.Generic_thrusterUart.handle        = GENERIC_THRUSTER_CFG_HANDLE;
+        GENERIC_THRUSTER_AppData.Generic_thrusterUart.isOpen        = PORT_CLOSED;
+        GENERIC_THRUSTER_AppData.Generic_thrusterUart.baud          = GENERIC_THRUSTER_CFG_BAUDRATE_HZ;
         GENERIC_THRUSTER_AppData.Generic_thrusterUart.access_option = uart_access_flag_RDWR;
 
         /* Open device specific protocols */
@@ -401,26 +408,28 @@ void GENERIC_THRUSTER_Enable(void)
         {
             GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceCount++;
             GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceEnabled = GENERIC_THRUSTER_DEVICE_ENABLED;
-            CFE_EVS_SendEvent(GENERIC_THRUSTER_ENABLE_INF_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_THRUSTER: Device enabled");
+            CFE_EVS_SendEvent(GENERIC_THRUSTER_ENABLE_INF_EID, CFE_EVS_EventType_INFORMATION,
+                              "GENERIC_THRUSTER: Device enabled");
         }
         else
         {
             GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceErrorCount++;
-            CFE_EVS_SendEvent(GENERIC_THRUSTER_UART_INIT_ERR_EID, CFE_EVS_EventType_ERROR, "GENERIC_THRUSTER: UART port initialization error %d", status);
+            CFE_EVS_SendEvent(GENERIC_THRUSTER_UART_INIT_ERR_EID, CFE_EVS_EventType_ERROR,
+                              "GENERIC_THRUSTER: UART port initialization error %d", status);
         }
     }
     else
     {
-        GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceErrorCount++;
-        CFE_EVS_SendEvent(GENERIC_THRUSTER_ENABLE_ERR_EID, CFE_EVS_EventType_ERROR, "GENERIC_THRUSTER: Device enable failed, already enabled");
+        /* Increment command error count */
+        GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandErrorCount++;
+        CFE_EVS_SendEvent(GENERIC_THRUSTER_ENABLE_ERR_EID, CFE_EVS_EventType_ERROR,
+                          "GENERIC_THRUSTER: Device enable failed, already enabled");
     }
     return;
 }
 
-
 /*
 ** Disable Component
-** TODO: Edit for your specific component implementation
 */
 void GENERIC_THRUSTER_Disable(void)
 {
@@ -429,24 +438,30 @@ void GENERIC_THRUSTER_Disable(void)
     /* Check that device is enabled */
     if (GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceEnabled == GENERIC_THRUSTER_DEVICE_ENABLED)
     {
+        /* Increment command success counter */
+        GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandCount++;
+
         /* Open device specific protocols */
         status = uart_close_port(&GENERIC_THRUSTER_AppData.Generic_thrusterUart);
         if (status == OS_SUCCESS)
         {
             GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceCount++;
             GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceEnabled = GENERIC_THRUSTER_DEVICE_DISABLED;
-            CFE_EVS_SendEvent(GENERIC_THRUSTER_DISABLE_INF_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_THRUSTER: Device disabled");
+            CFE_EVS_SendEvent(GENERIC_THRUSTER_DISABLE_INF_EID, CFE_EVS_EventType_INFORMATION,
+                              "GENERIC_THRUSTER: Device disabled");
         }
         else
         {
             GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceErrorCount++;
-            CFE_EVS_SendEvent(GENERIC_THRUSTER_UART_CLOSE_ERR_EID, CFE_EVS_EventType_ERROR, "GENERIC_THRUSTER: UART port close error %d", status);
+            CFE_EVS_SendEvent(GENERIC_THRUSTER_UART_CLOSE_ERR_EID, CFE_EVS_EventType_ERROR,
+                              "GENERIC_THRUSTER: UART port close error %d", status);
         }
     }
     else
     {
-        GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceErrorCount++;
-        CFE_EVS_SendEvent(GENERIC_THRUSTER_DISABLE_ERR_EID, CFE_EVS_EventType_ERROR, "GENERIC_THRUSTER: Device disable failed, already disabled");
+        GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandErrorCount++;
+        CFE_EVS_SendEvent(GENERIC_THRUSTER_DISABLE_ERR_EID, CFE_EVS_EventType_ERROR,
+                          "GENERIC_THRUSTER: Device disable failed, already disabled");
     }
     return;
 }
@@ -456,18 +471,25 @@ void GENERIC_THRUSTER_Percentage(GENERIC_THRUSTER_Percentage_cmd_t *Msg)
     if (GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceEnabled == GENERIC_THRUSTER_DEVICE_ENABLED)
     {
         int32_t status;
-        CFE_EVS_SendEvent(GENERIC_THRUSTER_PERCENTAGE_INF_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_THRUSTER: Thruster %d, percentage on %d", Msg->ThrusterNumber, Msg->Percentage);
-        status = GENERIC_THRUSTER_SetPercentage(&GENERIC_THRUSTER_AppData.Generic_thrusterUart, Msg->ThrusterNumber, Msg->Percentage, 6);
-        if (status < 0) {
+        CFE_EVS_SendEvent(GENERIC_THRUSTER_PERCENTAGE_INF_EID, CFE_EVS_EventType_INFORMATION,
+                          "GENERIC_THRUSTER: Thruster %d, percentage on %d", Msg->ThrusterNumber, Msg->Percentage);
+        status = GENERIC_THRUSTER_SetPercentage(&GENERIC_THRUSTER_AppData.Generic_thrusterUart, Msg->ThrusterNumber,
+                                                Msg->Percentage, 6);
+        if (status < 0)
+        {
             GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceErrorCount++;
-            CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_PERCENTAGE_EID, CFE_EVS_EventType_ERROR, "GENERIC_THRUSTER: Error writing to UART=%d\n", status);
-        } else {
-            GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceCount++;
+            CFE_EVS_SendEvent(GENERIC_THRUSTER_CMD_PERCENTAGE_EID, CFE_EVS_EventType_ERROR,
+                              "GENERIC_THRUSTER: Error writing to UART=%d\n", status);
+        }
+        else
+        {
+            /* Increment command success counter */
+            GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandCount++;
             /* Read the reply */
             /*uint8_t DataBuffer[1024];
             int32 DataLen;
-            DataLen = uart_bytes_available(&GENERIC_THRUSTER_AppData.Generic_thrusterUart); // check how many bytes are waiting on the uart
-            if (DataLen > 0)
+            DataLen = uart_bytes_available(&GENERIC_THRUSTER_AppData.Generic_thrusterUart); // check how many bytes are
+            waiting on the uart if (DataLen > 0)
             {
                 uart_read_port(&GENERIC_THRUSTER_AppData.Generic_thrusterUart, DataBuffer, DataLen);
                 OS_printf("GENERIC_THRUSTER: Response on UART=");
@@ -475,37 +497,35 @@ void GENERIC_THRUSTER_Percentage(GENERIC_THRUSTER_Percentage_cmd_t *Msg)
                 OS_printf("\n");
             }*/
         }
-    } 
-    else 
+    }
+    else
     {
-        CFE_EVS_SendEvent(GENERIC_THRUSTER_PERCENTAGE_ERR_EID, CFE_EVS_EventType_ERROR, "GENERIC_THRUSTER: Cannot turn thruster on, they are disabled");
+        /* Increment command error count */
+        GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandErrorCount++;
+        CFE_EVS_SendEvent(GENERIC_THRUSTER_PERCENTAGE_ERR_EID, CFE_EVS_EventType_ERROR,
+                          "GENERIC_THRUSTER: Cannot turn thruster on, they are disabled");
     }
 }
 
 /*
 ** Verify command packet length matches expected
 */
-int32 GENERIC_THRUSTER_VerifyCmdLength(CFE_MSG_Message_t * msg, uint16 expected_length)
-{     
-    int32 status = OS_SUCCESS;
-    CFE_SB_MsgId_t msg_id = CFE_SB_INVALID_MSG_ID;
-    CFE_MSG_FcnCode_t cmd_code = 0;
-    size_t actual_length = 0;
+int32 GENERIC_THRUSTER_VerifyCmdLength(CFE_MSG_Message_t *msg, uint16 expected_length)
+{
+    int32             status        = OS_SUCCESS;
+    CFE_SB_MsgId_t    msg_id        = CFE_SB_INVALID_MSG_ID;
+    CFE_MSG_FcnCode_t cmd_code      = 0;
+    size_t            actual_length = 0;
 
     CFE_MSG_GetSize(msg, &actual_length);
-    if (expected_length == actual_length)
-    {
-        /* Increment the command counter upon receipt of an invalid command */
-        GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandCount++;
-    }
-    else
+    if (expected_length != actual_length)
     {
         CFE_MSG_GetMsgId(msg, &msg_id);
         CFE_MSG_GetFcnCode(msg, &cmd_code);
 
         CFE_EVS_SendEvent(GENERIC_THRUSTER_LEN_ERR_EID, CFE_EVS_EventType_ERROR,
-           "Invalid msg length: ID = 0x%X,  CC = %d, Len = %ld, Expected = %d",
-              CFE_SB_MsgIdToValue(msg_id), cmd_code, actual_length, expected_length);
+                          "Invalid msg length: ID = 0x%X,  CC = %d, Len = %ld, Expected = %d",
+                          CFE_SB_MsgIdToValue(msg_id), cmd_code, actual_length, expected_length);
 
         status = OS_ERROR;
 
@@ -513,4 +533,4 @@ int32 GENERIC_THRUSTER_VerifyCmdLength(CFE_MSG_Message_t * msg, uint16 expected_
         GENERIC_THRUSTER_AppData.HkTelemetryPkt.CommandErrorCount++;
     }
     return status;
-} 
+}
