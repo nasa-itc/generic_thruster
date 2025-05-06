@@ -258,6 +258,9 @@
  
      UT_SetDeferredRetcode(UT_KEY(CFE_SB_Subscribe), 2, CFE_SB_BAD_ARGUMENT);
      UT_TEST_FUNCTION_RC(GENERIC_THRUSTER_AppInit(), CFE_SB_BAD_ARGUMENT);
+
+     UT_SetDeferredRetcode(UT_KEY(CFE_EVS_SendEvent), 1, CFE_EVS_INVALID_PARAMETER);
+     UT_TEST_FUNCTION_RC(GENERIC_THRUSTER_AppInit(), -1040187384);
  }
  
  void Test_GENERIC_THRUSTER_ProcessCommandPacket(void)
@@ -295,14 +298,20 @@
      UtAssert_True(EventTest.MatchCount == 0, "GENERIC_THRUSTER_CMD_ERR_EID not generated (%u)",
                    (unsigned int)EventTest.MatchCount);
  
-     /* invalid message id */
-     TestMsgId = CFE_SB_INVALID_MSG_ID;
+ 
+    /* RequestData id */
+     TestMsgId = CFE_SB_ValueToMsgId(GENERIC_THRUSTER_REQ_HK_MID);
+     FcnCode   = GENERIC_THRUSTER_REQ_DATA_TLM;
+     MsgSize   = sizeof(TestMsg.Noop);
+     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
      UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
      UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
+     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &MsgSize, sizeof(MsgSize), false);
      GENERIC_THRUSTER_ProcessCommandPacket();
-     UtAssert_True(EventTest.MatchCount == 1, "GENERIC_THRUSTER_CMD_ERR_EID generated (%u)",
+     UtAssert_True(EventTest.MatchCount == 0, "GENERIC_THRUSTER_CMD_ERR_EID not generated (%u)",
                    (unsigned int)EventTest.MatchCount);
- 
+
+
      /* RequestHK id */
      TestMsgId = CFE_SB_ValueToMsgId(GENERIC_THRUSTER_REQ_HK_MID);
      FcnCode   = GENERIC_THRUSTER_REQ_HK_TLM;
@@ -314,20 +323,17 @@
      GENERIC_THRUSTER_ProcessCommandPacket();
      UtAssert_True(EventTest.MatchCount == 0, "GENERIC_THRUSTER_CMD_ERR_EID not generated (%u)",
                    (unsigned int)EventTest.MatchCount);
- 
-     /* RequestData id */
-     TestMsgId = CFE_SB_ValueToMsgId(GENERIC_THRUSTER_REQ_HK_MID);
-     FcnCode   = GENERIC_THRUSTER_REQ_DATA_TLM;
-     MsgSize   = sizeof(TestMsg.Noop);
-     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
+
+                   
+     /* invalid message id */
+     TestMsgId = CFE_SB_INVALID_MSG_ID;
      UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
      UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
-     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &MsgSize, sizeof(MsgSize), false);
      GENERIC_THRUSTER_ProcessCommandPacket();
-     UtAssert_True(EventTest.MatchCount == 0, "GENERIC_THRUSTER_CMD_ERR_EID not generated (%u)",
+     UtAssert_True(EventTest.MatchCount == 1, "GENERIC_THRUSTER_CMD_ERR_EID generated (%u)",
                    (unsigned int)EventTest.MatchCount);
- 
-     
+
+   
  }
  
  void Test_GENERIC_THRUSTER_ProcessGroundCommand(void)
@@ -401,7 +407,18 @@
      UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
      UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
      UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
-     UT_CheckEvent_Setup(&EventTest, GENERIC_THRUSTER_CMD_RESET_INF_EID, NULL);
+     UT_CheckEvent_Setup(&EventTest, GENERIC_THRUSTER_CMD_ENABLE_INF_EID, NULL);
+     GENERIC_THRUSTER_ProcessGroundCommand(Msg);
+     UtAssert_True(EventTest.MatchCount == 1, "GENERIC_THRUSTER_CMD_ENABLE_INF_EID generated (%u)",
+                   (unsigned int)EventTest.MatchCount);
+
+    /* test dispatch of double ENABLE */
+     FcnCode = GENERIC_THRUSTER_ENABLE_CC;
+     Size    = sizeof(TestMsg.Reset);
+     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
+     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
+     UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
+     UT_CheckEvent_Setup(&EventTest, GENERIC_THRUSTER_CMD_ENABLE_INF_EID, NULL);
      GENERIC_THRUSTER_ProcessGroundCommand(Msg);
      UtAssert_True(EventTest.MatchCount == 1, "GENERIC_THRUSTER_CMD_ENABLE_INF_EID generated (%u)",
                    (unsigned int)EventTest.MatchCount);
@@ -416,23 +433,47 @@
      GENERIC_THRUSTER_ProcessGroundCommand(Msg);
      UtAssert_True(EventTest.MatchCount == 1, "GENERIC_THRUSTER_CMD_DISABLE_INF_EID generated (%u)",
                    (unsigned int)EventTest.MatchCount);
- 
-     // /* test dispatch of DISABLE */
-     // FcnCode = GENERIC_THRUSTER_PERCENTAGE_CC;
-     // Size    = sizeof(TestMsg.Percentage);
-     // TestMsg.Percentage.Percentage = 1;
-     // TestMsg.Percentage.ThrusterNumber = 1;
-     // UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
-     // UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
-     // UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
-     // UT_CheckEvent_Setup(&EventTest, GENERIC_THRUSTER_CMD_PERCENTAGE_INF_EID, NULL);
-     // GENERIC_THRUSTER_ProcessGroundCommand(Msg);
-     // UtAssert_True(EventTest.MatchCount == 1, "GENERIC_THRUSTER_CMD_PERCENTAGE_INF_EID generated (%u)",
-     //               (unsigned int)EventTest.MatchCount);
-     
-     
+
+    /* test dispatch of Percentage */
+    FcnCode = GENERIC_THRUSTER_PERCENTAGE_CC;
+    Size    = sizeof(TestMsg.Percentage);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
+    UT_CheckEvent_Setup(&EventTest, GENERIC_THRUSTER_CMD_PERCENTAGE_INF_EID, NULL);
+    GENERIC_THRUSTER_Percentage_cmd_t command;
+    GENERIC_THRUSTER_AppData.MsgPtr = (CFE_MSG_Message_t *)&command;
+    GENERIC_THRUSTER_ProcessGroundCommand(GENERIC_THRUSTER_AppData.MsgPtr);
+    UtAssert_True(EventTest.MatchCount == 1, "GENERIC_THRUSTER_CMD_PERCENTAGE_INF_EID generated (%u)",
+                   (unsigned int)EventTest.MatchCount);
+
+    /* test dispatch of Percentage */
+    FcnCode = GENERIC_THRUSTER_PERCENTAGE_CC;
+    Size    = sizeof(TestMsg.Percentage);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
+    UT_CheckEvent_Setup(&EventTest, GENERIC_THRUSTER_CMD_PERCENTAGE_INF_EID, NULL);
+    GENERIC_THRUSTER_Percentage_cmd_t command2;
+    GENERIC_THRUSTER_AppData.MsgPtr = (CFE_MSG_Message_t *)&command2;
+    GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceEnabled = GENERIC_THRUSTER_DEVICE_ENABLED;
+    GENERIC_THRUSTER_ProcessGroundCommand(GENERIC_THRUSTER_AppData.MsgPtr);
+    UtAssert_True(EventTest.MatchCount == 1, "GENERIC_THRUSTER_CMD_PERCENTAGE_INF_EID generated (%u)",
+                   (unsigned int)EventTest.MatchCount);
+    
+    /* test dispatch of CONFIG */
+    FcnCode = GENERIC_THRUSTER_PERCENTAGE_CC;
+    Size    = sizeof(TestMsg.Percentage);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetMsgId), &TestMsgId, sizeof(TestMsgId), false);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetFcnCode), &FcnCode, sizeof(FcnCode), false);
+    UT_SetDataBuffer(UT_KEY(CFE_MSG_GetSize), &Size, sizeof(Size), false);
+    UT_CheckEvent_Setup(&EventTest, GENERIC_THRUSTER_CMD_PERCENTAGE_INF_EID, NULL);
+    UT_SetDeferredRetcode(UT_KEY(GENERIC_THRUSTER_SetPercentage), 1, OS_ERROR);
+    CFE_MSG_Message_t msgPtr;
+    GENERIC_THRUSTER_AppData.MsgPtr = &msgPtr;
+    GENERIC_THRUSTER_ProcessGroundCommand(GENERIC_THRUSTER_AppData.MsgPtr);
  }
- 
+
  void Test_GENERIC_THRUSTER_ReportHousekeeping(void)
  {
      /*
@@ -464,7 +505,57 @@
      UtAssert_True(MsgTimestamp == &GENERIC_THRUSTER_AppData.HkTelemetryPkt.TlmHeader.Msg,
                    "CFE_SB_TimeStampMsg() address matches expected");
  }
+
+ void Test_GENERIC_THRUSTER_Enable(void)
+ {
+     UT_CheckEvent_t EventTest;
  
+     UT_CheckEvent_Setup(&EventTest, GENERIC_THRUSTER_ENABLE_INF_EID, NULL);
+     GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceEnabled = GENERIC_THRUSTER_DEVICE_DISABLED;
+     UT_SetDeferredRetcode(UT_KEY(uart_init_port), 1, OS_SUCCESS);
+     GENERIC_THRUSTER_Enable();
+     UtAssert_True(EventTest.MatchCount == 1, "GENERIC_THRUSTER: Device enabled (%u)", (unsigned int)EventTest.MatchCount);
+ 
+     UT_CheckEvent_Setup(&EventTest, GENERIC_THRUSTER_UART_INIT_ERR_EID, NULL);
+     GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceEnabled = GENERIC_THRUSTER_DEVICE_DISABLED;
+     UT_SetDeferredRetcode(UT_KEY(uart_init_port), 1, OS_ERROR);
+     GENERIC_THRUSTER_Enable();
+     UtAssert_True(EventTest.MatchCount == 1, "GENERIC_THRUSTER: UART port initialization error (%u)",
+                   (unsigned int)EventTest.MatchCount);
+ 
+     UT_CheckEvent_Setup(&EventTest, GENERIC_THRUSTER_ENABLE_ERR_EID, NULL);
+     GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceEnabled = GENERIC_THRUSTER_DEVICE_ENABLED;
+     UT_SetDeferredRetcode(UT_KEY(uart_init_port), 1, OS_ERROR);
+     GENERIC_THRUSTER_Enable();
+     UtAssert_True(EventTest.MatchCount == 1, "GENERIC_THRUSTER: Device enable failed, already enabled (%u)",
+                   (unsigned int)EventTest.MatchCount);
+ }
+
+ 
+void Test_GENERIC_THRUSTER_Disable(void)
+{
+    UT_CheckEvent_t EventTest;
+
+    UT_CheckEvent_Setup(&EventTest, GENERIC_THRUSTER_DISABLE_INF_EID, NULL);
+    GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceEnabled = GENERIC_THRUSTER_DEVICE_ENABLED;
+    UT_SetDeferredRetcode(UT_KEY(uart_close_port), 1, OS_SUCCESS);
+    GENERIC_THRUSTER_Disable();
+    UtAssert_True(EventTest.MatchCount == 1, "GENERIC_THRUSTER: Device disabled (%u)", (unsigned int)EventTest.MatchCount);
+
+    UT_CheckEvent_Setup(&EventTest, GENERIC_THRUSTER_UART_CLOSE_ERR_EID, NULL);
+    GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceEnabled = GENERIC_THRUSTER_DEVICE_ENABLED;
+    UT_SetDeferredRetcode(UT_KEY(uart_close_port), 1, OS_ERROR);
+    GENERIC_THRUSTER_Disable();
+    UtAssert_True(EventTest.MatchCount == 1, "GENERIC_THRUSTER: UART port close error (%u)", (unsigned int)EventTest.MatchCount);
+
+    UT_CheckEvent_Setup(&EventTest, GENERIC_THRUSTER_DISABLE_ERR_EID, NULL);
+    GENERIC_THRUSTER_AppData.HkTelemetryPkt.DeviceEnabled = GENERIC_THRUSTER_DEVICE_DISABLED;
+    UT_SetDeferredRetcode(UT_KEY(uart_close_port), 1, OS_ERROR);
+    GENERIC_THRUSTER_Disable();
+    UtAssert_True(EventTest.MatchCount == 1, "GENERIC_THRUSTER: Device disable failed, already disabled (%u)",
+                  (unsigned int)EventTest.MatchCount);
+}
+
  void Test_GENERIC_THRUSTER_VerifyCmdLength(void)
  {
      /*
@@ -530,5 +621,7 @@
      ADD_TEST(GENERIC_THRUSTER_ProcessGroundCommand);
      ADD_TEST(GENERIC_THRUSTER_ReportHousekeeping);
      ADD_TEST(GENERIC_THRUSTER_VerifyCmdLength);
+     ADD_TEST(GENERIC_THRUSTER_Enable);
+     ADD_TEST(GENERIC_THRUSTER_Disable);
  }
  
