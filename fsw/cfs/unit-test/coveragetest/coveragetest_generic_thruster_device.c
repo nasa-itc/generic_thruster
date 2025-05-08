@@ -17,6 +17,11 @@ void Test_GENERIC_THRUSTER_SetPercentage(void)
     status = GENERIC_THRUSTER_SetPercentage(&device, thruster_number, percentage, data_length);
     UtAssert_True(status == OS_SUCCESS, "GENERIC_THRUSTER_SetPercentage returned OS_SUCCESS");
 
+    /* Test success case */
+    UT_SetDeferredRetcode(UT_KEY(uart_write_port), 1, GENERIC_THRUSTER_DEVICE_CMD_SIZE);
+    status = GENERIC_THRUSTER_SetPercentage(&device, thruster_number, percentage, data_length);
+    UtAssert_True(status == OS_SUCCESS, "GENERIC_THRUSTER_SetPercentage returned OS_SUCCESS");
+
     /* Test uart_flush failure case */
     UT_SetDeferredRetcode(UT_KEY(uart_flush), 1, UART_ERROR);
     status = GENERIC_THRUSTER_SetPercentage(&device, thruster_number, percentage, data_length);
