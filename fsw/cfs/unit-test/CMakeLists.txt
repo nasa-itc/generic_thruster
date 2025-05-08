@@ -43,7 +43,7 @@ include_directories(${hwlib_MISSION_DIR}/fsw/public_inc)
 add_cfe_coverage_test(generic_thruster ALL 
     "coveragetest/coveragetest_generic_thruster_app.c"
     "../src/generic_thruster_app.c"
-    #"../../shared/generic_thruster_device.c"
+    "../../shared/generic_thruster_device.c"
     #"../../../../../fsw/apps/hwlib/fsw/stubs/libuart.c"
 )
 
