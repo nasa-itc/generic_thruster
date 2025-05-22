@@ -46,6 +46,6 @@
 /*
  * Allow UT access to the global "GENERIC_THRUSTER_APP_Data" object.
  */
-//extern GENERIC_THRUSTER_AppData_t GENERIC_THRUSTER_APP_Data;
+// extern GENERIC_THRUSTER_AppData_t GENERIC_THRUSTER_APP_Data;
 
 #endif /* UT_GENERIC_THRUSTER_APP_H */

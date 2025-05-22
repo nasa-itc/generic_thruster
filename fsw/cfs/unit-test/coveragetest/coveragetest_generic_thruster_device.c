@@ -3,10 +3,10 @@
 void Test_GENERIC_THRUSTER_SetPercentage(void)
 {
     uart_info_t device;
-    int32_t status;
-    uint8_t thruster_number = 1;
-    uint8_t percentage = 50;
-    uint8_t data_length = GENERIC_THRUSTER_DEVICE_CMD_SIZE;
+    int32_t     status;
+    uint8_t     thruster_number = 1;
+    uint8_t     percentage      = 50;
+    uint8_t     data_length     = GENERIC_THRUSTER_DEVICE_CMD_SIZE;
 
     /* Initialize the device structure */
     memset(&device, 0, sizeof(device));
@@ -34,7 +34,8 @@ void Test_GENERIC_THRUSTER_SetPercentage(void)
     UtAssert_True(status == OS_ERROR, "GENERIC_THRUSTER_SetPercentage returned OS_ERROR");
 }
 
-void Test_GENERIC_THRUSTER_SetPercentage_Hook(void *UserObj, UT_EntryKey_t FuncKey, const UT_StubContext_t *Context, va_list va)
+void Test_GENERIC_THRUSTER_SetPercentage_Hook(void *UserObj, UT_EntryKey_t FuncKey, const UT_StubContext_t *Context,
+                                              va_list va)
 {
 }
 
@@ -56,6 +57,7 @@ void Generic_thruster_UT_TearDown(void) {}
  */
 void UtTest_Setup(void)
 {
-    UT_SetVaHandlerFunction(UT_KEY(Test_GENERIC_THRUSTER_SetPercentage), Test_GENERIC_THRUSTER_SetPercentage_Hook, NULL);
+    UT_SetVaHandlerFunction(UT_KEY(Test_GENERIC_THRUSTER_SetPercentage), Test_GENERIC_THRUSTER_SetPercentage_Hook,
+                            NULL);
     ADD_TEST(GENERIC_THRUSTER_SetPercentage);
 }
