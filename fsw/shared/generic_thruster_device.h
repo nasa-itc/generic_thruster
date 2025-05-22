@@ -1,12 +1,12 @@
 /*******************************************************************************
-** File: sample_device.h
+** File: generic_thruster_device.h
 **
 ** Purpose:
-**   This is the header file for the SAMPLE device.
+**   This is the header file for the GENERIC_THRUSTER device.
 **
 *******************************************************************************/
-#ifndef _SAMPLE_DEVICE_H_
-#define _SAMPLE_DEVICE_H_
+#ifndef _GENERIC_THRUSTER_DEVICE_H_
+#define _GENERIC_THRUSTER_DEVICE_H_
 
 /*
 ** Required header files.
