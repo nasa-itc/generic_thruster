@@ -43,13 +43,17 @@ namespace Nos3
             data.reserve(3);
             parse_double_vector(values, data);
 
-            _generic_thruster_data[0] = data[0];
-            _generic_thruster_data[1] = data[1];
-            _generic_thruster_data[2] = data[2];
+            if (data.size() < 3) {
+                _generic_thruster_data_is_valid = false;
+            } else {
+                _generic_thruster_data[0] = data[0];
+                _generic_thruster_data[1] = data[1];
+                _generic_thruster_data[2] = data[2];
 
-            /* Mark data as valid */
-            _generic_thruster_data_is_valid = true;
-
+                /* Mark data as valid */
+                _generic_thruster_data_is_valid = true;
+            }
+            
             _not_parsed = false;
 
             /* Debug print */
