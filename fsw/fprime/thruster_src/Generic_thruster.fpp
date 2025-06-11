@@ -7,10 +7,37 @@ module Components {
         #@ TODO
         #async command TODO opcode 0
 
+        enum ActiveState {
+            DISABLED @< DISABLED
+            ENABLED @< ENABLED
+        }
+
+        enum thrusterNums {
+            thruster0 @< thruster 0
+            thruster1 @< thruster 1
+            thruster2 @< thruster 2
+            thruster3 @< thruster 3
+        }
+
+        @ NOOP Command
+        async command NOOP()
+
+        @ Enable Cmd
+        async command ENABLE()
+
+        @ Disable Cmd
+        async command DISABLE()
+
+        @ Reset Counters Cmd
+        async command RESET_COUNTERS()
+
+        @ Command to Request Housekeeping
+        async command REQUEST_HOUSEKEEPING()
+
         @ Command to issue greeting with maximum length of 20 characters
-        async command SetPercentage(
-            percent: U8 @< Percent speed of rotation
-            thruster_number: U8 @< Direction of rotation
+        async command SET_PERCENTAGE(
+            percent: U8 @< Percent speed of rotation, 0 to 100
+            thruster_number: thrusterNums @< Direction of rotation
         )
 
         @ Greeting event with maximum greeting length of 30 characters
@@ -18,11 +45,32 @@ module Components {
             log_info: string size 60 @< 
         ) severity activity high format "Generic_thruster: {}"
 
-        @ Thurster Number being set
-        telemetry thruster_number: U8
+        @ Percentage thruster is being set to
+        telemetry Percentage_0: U8
 
         @ Percentage thruster is being set to
-        telemetry percentage: U8
+        telemetry Percentage_1: U8
+
+        @ Percentage thruster is being set to
+        telemetry Percentage_2: U8
+
+        @ Percentage thruster is being set to
+        telemetry Percentage_3: U8
+
+        @ Command Count
+        telemetry CommandCount: U32
+
+        @ Command Error Count
+        telemetry CommandErrorCount: U32
+
+        @ Device Count
+        telemetry DeviceCount: U32
+
+        @ Device Error Count
+        telemetry DeviceErrorCount: U32
+
+        @ Device Enabled
+        telemetry DeviceEnabled: ActiveState
 
         ##############################################################################
         #### Uncomment the following examples to start customizing your component ####
