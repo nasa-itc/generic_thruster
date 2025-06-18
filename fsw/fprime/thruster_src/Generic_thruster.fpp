@@ -40,7 +40,7 @@ module Components {
             thruster_number: thrusterNums @< Direction of rotation
         )
 
-        @ Greeting event with maximum greeting length of 30 characters
+        @ Greeting event with maximum greeting length of 60 characters
         event TELEM(
             log_info: string size 60 @< 
         ) severity activity high format "Generic_thruster: {}"
