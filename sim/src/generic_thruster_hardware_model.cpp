@@ -190,7 +190,7 @@ namespace Nos3
                 out_data = in_data;
 
                 std::stringstream ss;
-                ss << "SC[0].AC.Thr[" << static_cast<unsigned>(in_data[2]) << "].ThrustLevelCmd = " << static_cast<double>(in_data[3])/100.0;
+                ss << "SC[0].Thr[" << static_cast<unsigned>(in_data[2]) << "].ThrustLevelCmd = " << static_cast<double>(in_data[3])/100.0;
                 dynamic_cast<Generic_thruster42DataProvider*>(_generic_thruster_dp)->send_command_to_socket(ss.str());
             }
         }
