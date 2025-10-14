@@ -12,24 +12,26 @@ include_directories("../../../../../fsw/apps/hwlib/fsw/public_inc")
 include_directories("../platform_inc")
 include_directories("../../../../../fsw/apps/hwlib/sim/inc")
 
-
-
-
-
-
 set(SOURCE_FILES
   "${CMAKE_CURRENT_LIST_DIR}/Generic_thruster.fpp"
   "${CMAKE_CURRENT_LIST_DIR}/Generic_thruster.cpp"
-  "${CMAKE_CURRENT_LIST_DIR}/../../shared/generic_thruster_device.c"
-  "${CMAKE_CURRENT_LIST_DIR}/../../../../../fsw/apps/hwlib/sim/src/nos_link.c"
+  # "${CMAKE_CURRENT_LIST_DIR}/../../shared/generic_thruster_device.c"
+  # "${CMAKE_CURRENT_LIST_DIR}/../../../../../fsw/apps/hwlib/sim/src/nos_link.c"
 )
 
 # Uncomment and add any modules that this component depends on, else
 # they might not be available when cmake tries to build this component.
 
 set(MOD_DEPS
+  Fw_Types
   ${ITC_Common_LIBRARIES}
   ${NOSENGINE_LIBRARIES}
 )
 
 register_fprime_module()
+
+target_sources(${FPRIME_CURRENT_MODULE} PRIVATE 
+  "${CMAKE_CURRENT_LIST_DIR}/../../shared/generic_thruster_device.c"
+  "${CMAKE_CURRENT_LIST_DIR}/../../../../../fsw/apps/hwlib/sim/src/nos_link.c"
+)
+

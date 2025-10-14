@@ -5,7 +5,8 @@
 // ======================================================================
 
 #include "thruster_src/Generic_thruster.hpp"
-#include "FpConfig.hpp"
+// #include "FpConfig.hpp"
+#include "Fw/FPrimeBasicTypes.hpp"
 #include <Fw/Log/LogString.hpp>
 
 
