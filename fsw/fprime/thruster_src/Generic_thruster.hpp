@@ -59,7 +59,7 @@ namespace Components {
       //! Destroy Generic_thruster object
       ~Generic_thruster();
 
-    PRIVATE:
+    private:
 
       // ----------------------------------------------------------------------
       // Handler implementations for commands
