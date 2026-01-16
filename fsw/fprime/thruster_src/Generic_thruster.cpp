@@ -5,7 +5,9 @@
 // ======================================================================
 
 #include "thruster_src/Generic_thruster.hpp"
-#include "FpConfig.hpp"
+// #include "FpConfig.hpp"
+#include "Fw/FPrimeBasicTypes.hpp"
+#include <Fw/Log/LogString.hpp>
 
 
 namespace Components {
@@ -66,7 +68,8 @@ namespace Components {
   void Generic_thruster :: NOOP_cmdHandler(FwOpcodeType opCode, U32 cmdSeq){
     HkTelemetryPkt.CommandCount++;
 
-    this->log_ACTIVITY_HI_TELEM("NOOP command success!");
+    Fw::LogStringArg log_msg("NOOP command success!");
+    this->log_ACTIVITY_HI_TELEM(log_msg);
     this->tlmWrite_CommandCount(HkTelemetryPkt.CommandCount);
     this->tlmWrite_DeviceEnabled(get_active_state(HkTelemetryPkt.DeviceEnabled));
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
@@ -88,18 +91,21 @@ namespace Components {
       {
         HkTelemetryPkt.DeviceCount++;
         HkTelemetryPkt.DeviceEnabled = GENERIC_THRUSTER_DEVICE_ENABLED;
-        this->log_ACTIVITY_HI_TELEM("Enable command success!");
+        Fw::LogStringArg log_msg("Enable command success!");
+        this->log_ACTIVITY_HI_TELEM(log_msg);
       }
       else
       {
         HkTelemetryPkt.DeviceErrorCount++;
-        this->log_ACTIVITY_HI_TELEM("Enable command failed to init UART!");
+        Fw::LogStringArg log_msg("Enable command failed to init UART!");
+        this->log_ACTIVITY_HI_TELEM(log_msg);
       }
     }
     else
     {
       HkTelemetryPkt.CommandErrorCount++;
-      this->log_ACTIVITY_HI_TELEM("Enable failed, already Enabled!");
+      Fw::LogStringArg log_msg("Enable failed, already Enabled!");
+      this->log_ACTIVITY_HI_TELEM(log_msg);
     }
 
     this->tlmWrite_CommandCount(HkTelemetryPkt.CommandCount);
@@ -122,18 +128,21 @@ namespace Components {
       {
         HkTelemetryPkt.DeviceCount++;
         HkTelemetryPkt.DeviceEnabled = GENERIC_THRUSTER_DEVICE_DISABLED;
-        this->log_ACTIVITY_HI_TELEM("Disable command success!");
+        Fw::LogStringArg log_msg("Disable command success!");
+        this->log_ACTIVITY_HI_TELEM(log_msg);
       }
       else
       {
         HkTelemetryPkt.DeviceErrorCount++;
-        this->log_ACTIVITY_HI_TELEM("Disable command failed to close UART!");
+        Fw::LogStringArg log_msg("Disable command failed to close UART!");
+        this->log_ACTIVITY_HI_TELEM(log_msg);
       }
     }
     else
     {
       HkTelemetryPkt.CommandErrorCount++;
-      this->log_ACTIVITY_HI_TELEM("Disable failed, already Disabled!");
+      Fw::LogStringArg log_msg("Disable failed, already Disabled!");
+      this->log_ACTIVITY_HI_TELEM(log_msg);
     }
 
     this->tlmWrite_CommandCount(HkTelemetryPkt.CommandCount);
@@ -150,7 +159,8 @@ namespace Components {
     HkTelemetryPkt.CommandErrorCount = 0;
     HkTelemetryPkt.DeviceCount = 0;
     HkTelemetryPkt.DeviceErrorCount = 0;
-    this->log_ACTIVITY_HI_TELEM("Reset Counters command successful!");
+    Fw::LogStringArg log_msg("Reset Counters command successful!");
+    this->log_ACTIVITY_HI_TELEM(log_msg);
     this->tlmWrite_CommandCount(HkTelemetryPkt.CommandCount);
     this->tlmWrite_CommandErrorCount(HkTelemetryPkt.CommandErrorCount);
     this->tlmWrite_DeviceCount(HkTelemetryPkt.DeviceCount);
@@ -174,11 +184,13 @@ namespace Components {
       this->tlmWrite_Percentage_2(HkTelemetryPkt.Percentage[2]);
       this->tlmWrite_Percentage_3(HkTelemetryPkt.Percentage[3]);
 
-      this->log_ACTIVITY_HI_TELEM("Requested Housekeeping!");
+      Fw::LogStringArg log_msg("Requested Housekeeping!");
+      this->log_ACTIVITY_HI_TELEM(log_msg);
     }
     else
     {
-      this->log_ACTIVITY_HI_TELEM("HK Failed, Device Disabled!");
+      Fw::LogStringArg log_msg("HK Failed, Device Disabled!");
+      this->log_ACTIVITY_HI_TELEM(log_msg);
     }   
 
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
@@ -200,21 +212,24 @@ namespace Components {
 
         char configMsg[40];
         sprintf(configMsg, "Thruster %d set to %d%% successfully!", thruster_number.e, percent);
-        this->log_ACTIVITY_HI_TELEM(configMsg);
+        Fw::LogStringArg log_msg(configMsg);
+        this->log_ACTIVITY_HI_TELEM(log_msg);
       }
       else
       {
         HkTelemetryPkt.DeviceErrorCount++;
         char configMsg[40];
         sprintf(configMsg, "Failed to set Thruster %d to %d%%!", thruster_number.e, percent);
-        this->log_ACTIVITY_HI_TELEM(configMsg);
+        Fw::LogStringArg log_msg(configMsg);
+        this->log_ACTIVITY_HI_TELEM(log_msg);
       }
     }
     else
     {
       HkTelemetryPkt.CommandErrorCount++;
 
-      this->log_ACTIVITY_HI_TELEM("Command failed, device Disabled!");
+      Fw::LogStringArg log_msg("Command failed, device Disabled!");
+      this->log_ACTIVITY_HI_TELEM(log_msg);
     }
 
     this->tlmWrite_Percentage_0(HkTelemetryPkt.Percentage[0]);
