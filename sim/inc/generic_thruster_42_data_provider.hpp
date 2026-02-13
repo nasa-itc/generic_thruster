@@ -3,7 +3,6 @@
 
 #include <boost/property_tree/ptree.hpp>
 #include <ItcLogger/Logger.hpp>
-#include <generic_thruster_data_point.hpp>
 #include <sim_data_42socket_provider.hpp>
 
 namespace Nos3
@@ -15,8 +14,12 @@ namespace Nos3
         /* Constructors */
         Generic_thruster42DataProvider(const boost::property_tree::ptree& config);
 
-        /* Accessors */
-        boost::shared_ptr<SimIDataPoint> get_data_point(void) const;
+        /** \brief Method to command the thruster
+         * 
+         *  @param thr_num  Thruster to command
+         *  @param thr_pct  Percentage of full thrust, 0-100
+         */
+        void cmd_thrust(int thr_num, double thr_pct);
 
     private:
         /* Disallow these */

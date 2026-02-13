@@ -8,7 +8,7 @@ namespace Nos3
     extern ItcLogger::Logger *sim_logger;
 
     Generic_thrusterHardwareModel::Generic_thrusterHardwareModel(const boost::property_tree::ptree& config) : SimIHardwareModel(config), 
-    _enabled(GENERIC_THRUSTER_SIM_SUCCESS), _count(0), _config(0), _status(0)
+    _enabled(GENERIC_THRUSTER_SIM_SUCCESS), _count(0), _status(0)
     {
         /* Get the NOS engine connection string */
         std::string connection_string = config.get("common.nos-connection-string", "tcp://127.0.0.1:12001"); 
@@ -107,7 +107,6 @@ namespace Nos3
         {
             _enabled = GENERIC_THRUSTER_SIM_ERROR;
             _count = 0;
-            _config = 0;
             _status = 0;
             response = "Generic_thrusterHardwareModel::command_callback:  Disabled";
         }
@@ -188,10 +187,7 @@ namespace Nos3
             if (valid == GENERIC_THRUSTER_SIM_SUCCESS)
             {   
                 out_data = in_data;
-
-                std::stringstream ss;
-                ss << "SC[0].Thr[" << static_cast<unsigned>(in_data[2]) << "].ThrustLevelCmd = " << static_cast<double>(in_data[3])/100.0;
-                dynamic_cast<Generic_thruster42DataProvider*>(_generic_thruster_dp)->send_command_to_socket(ss.str());
+                dynamic_cast<Generic_thruster42DataProvider*>(_generic_thruster_dp)->cmd_thrust(in_data[2], (double)in_data[3]);
             }
         }
 
